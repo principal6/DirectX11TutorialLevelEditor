@@ -862,7 +862,7 @@ namespace DirectX11TutorialLevelEditor
         private int[,] m_LevelTilesDesign;
         private int[,] m_LevelTilesMovement;
         private Color HoverColor;
-        private SSize m_LevelSizeInTiles;
+        private SSize m_LevelSizeInTileCount;
 
         private SPosition m_MouseHoverPos;
         private SPosition m_LevelBasePos;
@@ -903,9 +903,9 @@ namespace DirectX11TutorialLevelEditor
                     blend_factor = 0.6f;
                 }
 
-                for (int x = 0; x < m_LevelSizeInTiles.Width; ++x)
+                for (int x = 0; x < m_LevelSizeInTileCount.Width; ++x)
                 {
-                    for (int y = 0; y < m_LevelSizeInTiles.Height; ++y)
+                    for (int y = 0; y < m_LevelSizeInTileCount.Height; ++y)
                     {
                         if (m_LevelTilesDesign[x, y] == -1) continue;
 
@@ -935,9 +935,9 @@ namespace DirectX11TutorialLevelEditor
 
                 if (m_TileMode == ETileMode.Movement)
                 {
-                    for (int x = 0; x < m_LevelSizeInTiles.Width; ++x)
+                    for (int x = 0; x < m_LevelSizeInTileCount.Width; ++x)
                     {
-                        for (int y = 0; y < m_LevelSizeInTiles.Height; ++y)
+                        for (int y = 0; y < m_LevelSizeInTileCount.Height; ++y)
                         {
                             int offset_x = -m_LevelBasePos.X + x;
                             int offset_y = -m_LevelBasePos.Y + y;
@@ -1038,8 +1038,8 @@ namespace DirectX11TutorialLevelEditor
             int offset_x = m_LevelBasePos.X + x_in_tiles;
             int offset_y = m_LevelBasePos.Y + y_in_tiles;
 
-            if (((offset_x >= 0) && (offset_x < m_LevelSizeInTiles.Width)) &&
-                ((offset_y >= 0) && (offset_y < m_LevelSizeInTiles.Height)))
+            if (((offset_x >= 0) && (offset_x < m_LevelSizeInTileCount.Width)) &&
+                ((offset_y >= 0) && (offset_y < m_LevelSizeInTileCount.Height)))
             {
                 SPosition sized_selection = tile_mode.SelectionOrigin;
                 int sized_x;
@@ -1051,7 +1051,7 @@ namespace DirectX11TutorialLevelEditor
                         sized_x = offset_x + x;
                         sized_y = offset_y + y;
 
-                        if ((sized_x < m_LevelSizeInTiles.Width) && (sized_y < m_LevelSizeInTiles.Height))
+                        if ((sized_x < m_LevelSizeInTileCount.Width) && (sized_y < m_LevelSizeInTileCount.Height))
                         {
                             sized_selection.X = tile_mode.SelectionOrigin.X + x;
                             sized_selection.Y = tile_mode.SelectionOrigin.Y + y;
@@ -1081,7 +1081,7 @@ namespace DirectX11TutorialLevelEditor
 
         public SSize GetLevelSize()
         {
-            return m_LevelSizeInTiles;
+            return m_LevelSizeInTileCount;
         }
 
         public SSize GetTileSize()
@@ -1170,8 +1170,8 @@ namespace DirectX11TutorialLevelEditor
             m_DesignTileInfo = design_tile;
             m_MovementTileInfo = movement_tile;
 
-            m_LevelSizeInTiles.Width = size_x;
-            m_LevelSizeInTiles.Height = size_y;
+            m_LevelSizeInTileCount.Width = size_x;
+            m_LevelSizeInTileCount.Height = size_y;
 
             m_LevelTilesDesign = new int[size_x, size_y];
             m_LevelTilesMovement = new int[size_x, size_y];
