@@ -729,9 +729,13 @@ namespace DirectX11TutorialLevelEditor
 
             design.TileSheetSizeInTileCount.Width = m_Textures[0].Texture.Width / design.TileSize.Width;
             design.TileSheetSizeInTileCount.Height = m_Textures[0].Texture.Height / design.TileSize.Height;
+            design.SelectionSizeInTileCount.Width = 1;
+            design.SelectionSizeInTileCount.Height = 1;
 
             movement.TileSheetSizeInTileCount.Width = m_Textures[1].Texture.Width / movement.TileSize.Width;
             movement.TileSheetSizeInTileCount.Height = m_Textures[1].Texture.Height / movement.TileSize.Height;
+            movement.SelectionSizeInTileCount.Width = 1;
+            movement.SelectionSizeInTileCount.Height = 1;
 
             m_DesignTileInfo = design;
             m_MovementTileInfo = movement;
