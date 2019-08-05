@@ -1,0 +1,13 @@
+<DirectX11TutorialLevel>
+  <level_info name="test_map" tile_size_width="64" tile_size_height="64" map_width="3" map_height="3" design_tileset="grass_64x64.png" movement_tileset="movement_platformer_64x64.png" />
+  <design_tiles>
+    <row id="0" t0="0" t1="1" t2="2" />
+    <row id="1" t0="7" t1="8" t2="9" />
+    <row id="2" t0="14" t1="15" t2="16" />
+  </design_tiles>
+  <movement_tiles>
+    <row id="0" t0="0" t1="0" t2="0" />
+    <row id="1" t0="0" t1="1" t2="0" />
+    <row id="2" t0="0" t1="0" t2="0" />
+  </movement_tiles>
+</DirectX11TutorialLevel>

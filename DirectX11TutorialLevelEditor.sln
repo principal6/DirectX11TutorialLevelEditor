@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29123.88
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DirectX11TutorialLevelEditor", "DirectX11TutorialLevelEditor.csproj", "{B35F5EDC-A45C-4E6F-8964-1A308DFD22B9}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{B35F5EDC-A45C-4E6F-8964-1A308DFD22B9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B35F5EDC-A45C-4E6F-8964-1A308DFD22B9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B35F5EDC-A45C-4E6F-8964-1A308DFD22B9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B35F5EDC-A45C-4E6F-8964-1A308DFD22B9}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {89A37A92-96B8-4D79-B5CA-E3E750848ED7}
+	EndGlobalSection
+EndGlobal
