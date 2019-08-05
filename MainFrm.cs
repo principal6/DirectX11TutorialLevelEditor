@@ -1,19 +1,13 @@
-﻿using System;
+﻿using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
+using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
+using System.Diagnostics;
+using System.IO;
 //using System.Drawing;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
-
-using System.IO;
-using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
-
 using System.Xml;
-using System.Diagnostics;
 
 namespace DirectX11TutorialLevelEditor
 {
@@ -30,7 +24,7 @@ namespace DirectX11TutorialLevelEditor
 
         public static bool operator ==(SSize a, SSize b)
         {
-            if ( (a.Width == b.Width) && (a.Height == b.Height))
+            if ((a.Width == b.Width) && (a.Height == b.Height))
             {
                 return true;
             }
@@ -95,6 +89,12 @@ namespace DirectX11TutorialLevelEditor
         {
             return base.GetHashCode();
         }
+    }
+
+    public enum EHistoryAction
+    {
+        SetTile, // IntData = { X, Y, OldTileID, NewTileID }
+        ChangeTileMode,
     }
 
     public struct STileModeInfo
@@ -179,15 +179,30 @@ namespace DirectX11TutorialLevelEditor
 
         private void MainFrm_KeyDown(object sender, KeyEventArgs e)
         {
-            if (e.Control == true)
+            if (e.KeyCode == Keys.D1)
             {
-                if (e.KeyCode == Keys.D1)
+                if (e.Control == true)
                 {
                     TabTileView.SelectedIndex = 0;
                 }
-                else if (e.KeyCode == Keys.D2)
+            }
+            else if (e.KeyCode == Keys.D2)
+            {
+                if (e.Control == true)
                 {
                     TabTileView.SelectedIndex = 1;
+                }
+            }
+
+            if (e.KeyCode == Keys.Z)
+            {
+                if ((e.Control == true) && (e.Shift == true))
+                {
+                    SurfaceLevel.RedoHistory(ref TabTileView);
+                }
+                else if (e.Control == true)
+                {
+                    SurfaceLevel.UndoHistory(ref TabTileView);
                 }
             }
         }
@@ -395,8 +410,8 @@ namespace DirectX11TutorialLevelEditor
                 level_info.SetAttribute("tile_size_height", SurfaceLevel.GetTileSize().Height.ToString());
                 level_info.SetAttribute("level_width", SurfaceLevel.GetLevelSize().Width.ToString());
                 level_info.SetAttribute("level_height", SurfaceLevel.GetLevelSize().Height.ToString());
-                level_info.SetAttribute("design_tileset", SurfaceLevel.GetDesignTileInfoRef().TileSheetFileName);
-                level_info.SetAttribute("movement_tileset", SurfaceLevel.GetMovementTileInfoRef().TileSheetFileName);
+                level_info.SetAttribute("design_tileset", SurfaceLevel.GetTileModeInfoRef(ETileMode.Design).TileSheetFileName);
+                level_info.SetAttribute("movement_tileset", SurfaceLevel.GetTileModeInfoRef(ETileMode.Movement).TileSheetFileName);
 
                 root.AppendChild(level_info);
             }
@@ -419,7 +434,7 @@ namespace DirectX11TutorialLevelEditor
 
                     desgin_tile_data.AppendChild(row);
                 }
-                
+
                 root.AppendChild(desgin_tile_data);
             }
 
@@ -507,7 +522,7 @@ namespace DirectX11TutorialLevelEditor
                 XmlAttribute movement_tileset = level_info.Attributes[6];
                 movement_tile_info.TileSheetFileName = movement_tileset.Value;
 
-                
+
 
                 SurfaceTile.SetTileSheetTextures(ref design_tile_info, ref movement_tile_info);
 
@@ -611,7 +626,7 @@ namespace DirectX11TutorialLevelEditor
         public void AddTexture(string texture_file_name)
         {
             m_Textures.Add(new MGTextureData());
-            
+
             Texture2D texture = Texture2D.FromStream(Editor.graphics, File.OpenRead(m_AssetDir + texture_file_name));
 
             m_Textures.ElementAt(m_Textures.Count - 1).Texture = texture;
@@ -663,7 +678,7 @@ namespace DirectX11TutorialLevelEditor
         STileModeInfo m_DesignTileInfo;
         STileModeInfo m_MovementTileInfo;
 
-        public MGSurfaceTile(string asset_dir) : base(asset_dir) {}
+        public MGSurfaceTile(string asset_dir) : base(asset_dir) { }
 
         protected override void Initialize()
         {
@@ -871,6 +886,11 @@ namespace DirectX11TutorialLevelEditor
         private STileModeInfo m_DesignTileInfo;
         private STileModeInfo m_MovementTileInfo;
 
+        private Stack<CHistory> m_HistoryStack = new Stack<CHistory>();
+        private Stack<CHistory> m_UnHistoryStack = new Stack<CHistory>();
+        private int m_HistoryStackLastGroup = 0;
+        private int m_UnHistoryStackLastGroup = 0;
+
         public MGSurfaceLevel(string asset_dir) : base(asset_dir) { }
 
         protected override void Initialize()
@@ -980,7 +1000,7 @@ namespace DirectX11TutorialLevelEditor
                 Rectangle rect_src = new Rectangle(
                         tile_xy.X * curr_mode.TileSize.Width,
                         tile_xy.Y * curr_mode.TileSize.Height,
-                        curr_mode.SelectionSizeInTileCount.Width * curr_mode.TileSize.Width, 
+                        curr_mode.SelectionSizeInTileCount.Width * curr_mode.TileSize.Width,
                         curr_mode.SelectionSizeInTileCount.Height * curr_mode.TileSize.Height);
 
                 Editor.spriteBatch.Draw(m_Textures[texture_index].Texture,
@@ -992,6 +1012,19 @@ namespace DirectX11TutorialLevelEditor
 
         public void UpdateTileMode(ETileMode mode)
         {
+            if (m_TileMode == mode)
+            {
+                return;
+            }
+
+            ++m_HistoryStackLastGroup;
+
+            CHistory new_history = new CHistory();
+            new_history.eAction = EHistoryAction.ChangeTileMode;
+            new_history.GroupID = m_HistoryStackLastGroup;
+            new_history.CurrTileMode = m_TileMode;
+            m_HistoryStack.Push(new_history);
+
             m_TileMode = mode;
 
             Invalidate();
@@ -1029,6 +1062,8 @@ namespace DirectX11TutorialLevelEditor
 
         public void SetLevelTile(int mouse_x, int mouse_y, bool should_erase = false)
         {
+            bool is_set_new_tile = false;
+
             ref STileModeInfo tile_mode = ref GetCurrentTileModeInfoRef();
             ref int[,] tiles = ref GetCurrentModeTilesRef();
 
@@ -1044,6 +1079,9 @@ namespace DirectX11TutorialLevelEditor
                 SPosition sized_selection = tile_mode.SelectionOrigin;
                 int sized_x;
                 int sized_y;
+
+                ++m_HistoryStackLastGroup;
+
                 for (int x = 0; x < tile_mode.SelectionSizeInTileCount.Width; ++x)
                 {
                     for (int y = 0; y < tile_mode.SelectionSizeInTileCount.Height; ++y)
@@ -1056,23 +1094,48 @@ namespace DirectX11TutorialLevelEditor
                             sized_selection.X = tile_mode.SelectionOrigin.X + x;
                             sized_selection.Y = tile_mode.SelectionOrigin.Y + y;
 
-                            int tile_id = GetTileIDFromTileXY(ref tile_mode, sized_selection);
+                            int new_tile_id = GetTileIDFromTileXY(ref tile_mode, sized_selection);
 
                             if (should_erase == true)
                             {
                                 if (m_TileMode == ETileMode.Design)
                                 {
-                                    tile_id = -1;
+                                    new_tile_id = -1;
                                 }
                                 else
                                 {
-                                    tile_id = 0;
+                                    new_tile_id = 0;
                                 }
                             }
 
-                            tiles[sized_x, sized_y] = tile_id;
+                            ref int old_tile_id = ref tiles[sized_x, sized_y];
+
+                            if (old_tile_id == new_tile_id)
+                            {
+                                continue;
+                            }
+
+                            is_set_new_tile = true;
+
+                            CHistory new_history = new CHistory();
+                            new_history.GroupID = m_HistoryStackLastGroup;
+                            new_history.eAction = EHistoryAction.SetTile;
+                            new_history.CurrTileMode = m_TileMode;
+                            new_history.IntData[0] = sized_x;
+                            new_history.IntData[1] = sized_y;
+                            new_history.IntData[2] = old_tile_id;
+                            new_history.IntData[3] = new_tile_id;
+
+                            m_HistoryStack.Push(new_history);
+
+                            old_tile_id = new_tile_id;
                         }
                     }
+                }
+
+                if (is_set_new_tile == false)
+                {
+                    --m_HistoryStackLastGroup;
                 }
             }
 
@@ -1113,6 +1176,18 @@ namespace DirectX11TutorialLevelEditor
             }
         }
 
+        private ref int[,] GetTilesRef(ETileMode tile_mode)
+        {
+            if (tile_mode == ETileMode.Design)
+            {
+                return ref m_LevelTilesDesign;
+            }
+            else
+            {
+                return ref m_LevelTilesMovement;
+            }
+        }
+
         private ref int[,] GetCurrentModeTilesRef()
         {
             if (m_TileMode == ETileMode.Design)
@@ -1135,14 +1210,16 @@ namespace DirectX11TutorialLevelEditor
             return ref m_LevelTilesMovement;
         }
 
-        public ref STileModeInfo GetDesignTileInfoRef()
+        public ref STileModeInfo GetTileModeInfoRef(ETileMode mode)
         {
-            return ref m_DesignTileInfo;
-        }
-
-        public ref STileModeInfo GetMovementTileInfoRef()
-        {
-            return ref m_MovementTileInfo;
+            if (mode == ETileMode.Design)
+            {
+                return ref m_DesignTileInfo;
+            }
+            else
+            {
+                return ref m_MovementTileInfo;
+            }
         }
 
         private int GetTileIDFromTileXY(ref STileModeInfo mode, SPosition tile_xy)
@@ -1159,7 +1236,7 @@ namespace DirectX11TutorialLevelEditor
 
             int y = tile_id / mode.TileSheetSizeInTileCount.Width;
             int x = tile_id - y * mode.TileSheetSizeInTileCount.Width;
-            
+
             return new SPosition(x, y);
         }
 
@@ -1199,5 +1276,123 @@ namespace DirectX11TutorialLevelEditor
 
             Invalidate();
         }
+
+        public void UndoHistory(ref TabControl tab_control)
+        {
+            ref Stack<CHistory> this_history = ref m_HistoryStack;
+            ref Stack<CHistory> that_history = ref m_UnHistoryStack;
+            ref int this_history_group_id = ref m_HistoryStackLastGroup;
+            ref int that_history_group_id = ref m_UnHistoryStackLastGroup;
+
+            if (this_history.Count() > 0)
+            {
+                while (true)
+                {
+                    if (this_history.Count() == 0)
+                    {
+                        break;
+                    }
+
+                    CHistory last_history = this_history.Peek();
+                    if (last_history.GroupID == this_history_group_id)
+                    {
+                        if (last_history.eAction == EHistoryAction.SetTile)
+                        {
+                            ref STileModeInfo tile_mode = ref GetTileModeInfoRef(last_history.CurrTileMode);
+
+                            ref int[,] tiles = ref GetTilesRef(last_history.CurrTileMode);
+
+                            tiles[last_history.IntData[0], last_history.IntData[1]] = last_history.IntData[2];
+                        }
+                        else if (last_history.eAction == EHistoryAction.ChangeTileMode)
+                        {
+                            m_TileMode = last_history.CurrTileMode;
+
+                            int tab_index = 0;
+                            if (m_TileMode == ETileMode.Movement)
+                            {
+                                tab_index = 1;
+                            }
+
+                            tab_control.SelectedIndex = tab_index;
+                        }
+
+                        that_history.Push(this_history.Pop());
+                    }
+                    else
+                    {
+                        break;
+                    }
+                }
+
+                that_history_group_id = this_history_group_id;
+                --this_history_group_id;
+
+                Invalidate();
+            }
+        }
+
+        public void RedoHistory(ref TabControl tab_control)
+        {
+            ref Stack<CHistory> this_history = ref m_UnHistoryStack;
+            ref Stack<CHistory> that_history = ref m_HistoryStack;
+            ref int this_history_group_id = ref m_UnHistoryStackLastGroup;
+            ref int that_history_group_id = ref m_HistoryStackLastGroup;
+
+            if (this_history.Count() > 0)
+            {
+                while (true)
+                {
+                    if (this_history.Count() == 0)
+                    {
+                        break;
+                    }
+
+                    CHistory last_history = this_history.Peek();
+                    if (last_history.GroupID == this_history_group_id)
+                    {
+                        if (last_history.eAction == EHistoryAction.SetTile)
+                        {
+                            ref STileModeInfo tile_mode = ref GetTileModeInfoRef(last_history.CurrTileMode);
+
+                            ref int[,] tiles = ref GetTilesRef(last_history.CurrTileMode);
+
+                            tiles[last_history.IntData[0], last_history.IntData[1]] = last_history.IntData[3];
+                        }
+                        else if (last_history.eAction == EHistoryAction.ChangeTileMode)
+                        {
+                            m_TileMode = last_history.CurrTileMode;
+
+                            int tab_index = 0;
+                            if (m_TileMode == ETileMode.Movement)
+                            {
+                                tab_index = 1;
+                            }
+
+                            tab_control.SelectedIndex = tab_index;
+                        }
+
+                        that_history.Push(this_history.Pop());
+                    }
+                    else
+                    {
+                        break;
+                    }
+                }
+
+                that_history_group_id = this_history_group_id;
+                --this_history_group_id;
+
+                Invalidate();
+            }
+        }
+    }
+
+    public class CHistory
+    {
+        public ETileMode CurrTileMode;
+        public EHistoryAction eAction;
+        public int GroupID;
+        public int[] IntData = new int[5];
     }
 }
