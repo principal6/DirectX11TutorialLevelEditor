@@ -721,13 +721,10 @@ namespace DirectX11TutorialLevelEditor
         {
             Debug.Assert(design.TileSize == movement.TileSize);
 
-            m_DesignTileInfo = design;
-            m_MovementTileInfo = movement;
-            
             m_Textures.Clear();
 
-            AddTexture(m_DesignTileInfo.TileSheetFileName);
-            AddTexture(m_MovementTileInfo.TileSheetFileName);
+            AddTexture(design.TileSheetFileName);
+            AddTexture(movement.TileSheetFileName);
             AddTexture(CreateBlankTexture2D(64, 64));
 
             design.TileSheetSizeInTileCount.Width = m_Textures[0].Texture.Width / design.TileSize.Width;
@@ -735,6 +732,9 @@ namespace DirectX11TutorialLevelEditor
 
             movement.TileSheetSizeInTileCount.Width = m_Textures[1].Texture.Width / movement.TileSize.Width;
             movement.TileSheetSizeInTileCount.Height = m_Textures[1].Texture.Height / movement.TileSize.Height;
+
+            m_DesignTileInfo = design;
+            m_MovementTileInfo = movement;
 
             m_Textures[2].BlendColor = new Color(0.0f, 0.3f, 0.8f, 0.5f);
         }
@@ -783,11 +783,27 @@ namespace DirectX11TutorialLevelEditor
         {
             ref STileModeInfo tile_mode = ref GetCurrentTileModeInfoRef();
 
+            int x_max = tile_mode.TileSheetSizeInTileCount.Width - 1;
+            int y_max = tile_mode.TileSheetSizeInTileCount.Height - 1;
+
             tile_mode.SelectionOrigin.X = tile_mode.TileSelectionOffset.X + (selection_origin.X / tile_mode.TileSize.Width);
+            tile_mode.SelectionOrigin.X = Math.Min(tile_mode.SelectionOrigin.X, x_max);
+
             tile_mode.SelectionOrigin.Y = tile_mode.TileSelectionOffset.Y + (selection_origin.Y / tile_mode.TileSize.Height);
+            tile_mode.SelectionOrigin.Y = Math.Min(tile_mode.SelectionOrigin.Y, y_max);
 
             tile_mode.SelectionSizeInTileCount.Width = selection_size.Width / tile_mode.TileSize.Width;
             tile_mode.SelectionSizeInTileCount.Height = selection_size.Height / tile_mode.TileSize.Height;
+
+            if (tile_mode.SelectionOrigin.X + tile_mode.SelectionSizeInTileCount.Width > x_max)
+            {
+                tile_mode.SelectionSizeInTileCount.Width = x_max - tile_mode.SelectionOrigin.X + 1;
+            }
+
+            if (tile_mode.SelectionOrigin.Y + tile_mode.SelectionSizeInTileCount.Height > y_max)
+            {
+                tile_mode.SelectionSizeInTileCount.Height = y_max - tile_mode.SelectionOrigin.Y + 1;
+            }
 
             UpdateSelection();
         }
