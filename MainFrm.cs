@@ -1244,6 +1244,11 @@ namespace DirectX11TutorialLevelEditor
         {
             System.Diagnostics.Debug.Assert(design_tile.TileSize == movement_tile.TileSize);
 
+            m_HistoryStack.Clear();
+            m_UnHistoryStack.Clear();
+            m_HistoryStackLastGroup = 0;
+            m_UnHistoryStackLastGroup = 0;
+
             m_DesignTileInfo = design_tile;
             m_MovementTileInfo = movement_tile;
 
