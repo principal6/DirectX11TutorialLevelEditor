@@ -889,7 +889,6 @@ namespace DirectX11TutorialLevelEditor
         private Stack<CHistory> m_HistoryStack = new Stack<CHistory>();
         private Stack<CHistory> m_UnHistoryStack = new Stack<CHistory>();
         private int m_HistoryStackLastGroup = 0;
-        private int m_UnHistoryStackLastGroup = 0;
 
         public MGSurfaceLevel(string asset_dir) : base(asset_dir) { }
 
@@ -1247,7 +1246,6 @@ namespace DirectX11TutorialLevelEditor
             m_HistoryStack.Clear();
             m_UnHistoryStack.Clear();
             m_HistoryStackLastGroup = 0;
-            m_UnHistoryStackLastGroup = 0;
 
             m_DesignTileInfo = design_tile;
             m_MovementTileInfo = movement_tile;
@@ -1286,11 +1284,11 @@ namespace DirectX11TutorialLevelEditor
         {
             ref Stack<CHistory> this_history = ref m_HistoryStack;
             ref Stack<CHistory> that_history = ref m_UnHistoryStack;
-            ref int this_history_group_id = ref m_HistoryStackLastGroup;
-            ref int that_history_group_id = ref m_UnHistoryStackLastGroup;
 
             if (this_history.Count() > 0)
             {
+                int captured_group_id = this_history.Peek().GroupID;
+
                 while (true)
                 {
                     if (this_history.Count() == 0)
@@ -1299,7 +1297,7 @@ namespace DirectX11TutorialLevelEditor
                     }
 
                     CHistory last_history = this_history.Peek();
-                    if (last_history.GroupID == this_history_group_id)
+                    if (last_history.GroupID == captured_group_id)
                     {
                         if (last_history.eAction == EHistoryAction.SetTile)
                         {
@@ -1330,8 +1328,7 @@ namespace DirectX11TutorialLevelEditor
                     }
                 }
 
-                that_history_group_id = this_history_group_id;
-                --this_history_group_id;
+                --m_HistoryStackLastGroup;
 
                 Invalidate();
             }
@@ -1341,11 +1338,11 @@ namespace DirectX11TutorialLevelEditor
         {
             ref Stack<CHistory> this_history = ref m_UnHistoryStack;
             ref Stack<CHistory> that_history = ref m_HistoryStack;
-            ref int this_history_group_id = ref m_UnHistoryStackLastGroup;
-            ref int that_history_group_id = ref m_HistoryStackLastGroup;
 
             if (this_history.Count() > 0)
             {
+                int captured_group_id = this_history.Peek().GroupID;
+
                 while (true)
                 {
                     if (this_history.Count() == 0)
@@ -1354,7 +1351,7 @@ namespace DirectX11TutorialLevelEditor
                     }
 
                     CHistory last_history = this_history.Peek();
-                    if (last_history.GroupID == this_history_group_id)
+                    if (last_history.GroupID == captured_group_id)
                     {
                         if (last_history.eAction == EHistoryAction.SetTile)
                         {
@@ -1385,8 +1382,7 @@ namespace DirectX11TutorialLevelEditor
                     }
                 }
 
-                that_history_group_id = this_history_group_id;
-                --this_history_group_id;
+                ++m_HistoryStackLastGroup;
 
                 Invalidate();
             }
