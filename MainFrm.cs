@@ -1363,12 +1363,20 @@ namespace DirectX11TutorialLevelEditor
                         }
                         else if (last_history.eAction == EHistoryAction.ChangeTileMode)
                         {
-                            m_TileMode = last_history.CurrTileMode;
-
-                            int tab_index = 0;
+                            switch (last_history.CurrTileMode)
+                            {
+                                case ETileMode.Design:
+                                    m_TileMode = ETileMode.Movement;
+                                    break;
+                                case ETileMode.Movement:
+                                    m_TileMode = ETileMode.Design;
+                                    break;
+                            }
+                            
+                            int tab_index = 1;
                             if (m_TileMode == ETileMode.Movement)
                             {
-                                tab_index = 1;
+                                tab_index = 0;
                             }
 
                             tab_control.SelectedIndex = tab_index;
