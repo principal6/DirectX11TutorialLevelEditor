@@ -31,15 +31,20 @@ namespace DirectX11TutorialLevelEditor
             BeginDrawing();
 
             int texture_index = GetCurrentTileModeTextureIndex();
+            ref STileModeInfo tile_mode = ref GetCurrentTileModeInfoRef();
 
-            Editor.spriteBatch.Draw(m_Textures[texture_index].Texture, m_Textures[texture_index].Rect,
+            Rectangle scaled_rect_dest = new Rectangle(0, 0, 
+                tile_mode.TileSheetSizeInTileCount.Width * tile_mode.TileSize.Width,
+                tile_mode.TileSheetSizeInTileCount.Height * tile_mode.TileSize.Height);
+
+            Editor.spriteBatch.Draw(m_Textures[texture_index].Texture,
+                scaled_rect_dest, m_Textures[texture_index].Rect,
                 m_Textures[texture_index].BlendColor * ((float)m_Textures[texture_index].BlendColor.A / 255.0f));
 
-            ref STileModeInfo tile_mode = ref GetCurrentTileModeInfoRef();
+            
 
             if ((tile_mode.SelectionSizeInTileCount.Width >= 1) || (tile_mode.SelectionSizeInTileCount.Height >= 1))
             {
-                Rectangle rect_src = new Rectangle(0, 0, 1, 1);
                 Rectangle rect_dest = m_Textures[2].Rect;
                 rect_dest.Width = tile_mode.TileSize.Width;
                 rect_dest.Height = tile_mode.TileSize.Height;
@@ -52,7 +57,7 @@ namespace DirectX11TutorialLevelEditor
                         rect_dest.Y = m_Textures[2].Rect.Y + y * tile_mode.TileSize.Height;
 
                         Editor.spriteBatch.Draw(m_Textures[2].Texture,
-                            rect_dest, rect_src,
+                            rect_dest, new Rectangle(0, 0, 1, 1),
                             m_Textures[2].BlendColor * ((float)m_Textures[2].BlendColor.A / 255.0f));
                     }
                 }
@@ -88,8 +93,8 @@ namespace DirectX11TutorialLevelEditor
             design.SelectionSizeInTileCount.Width = 1;
             design.SelectionSizeInTileCount.Height = 1;
 
-            movement.TileSheetSizeInTileCount.Width = m_Textures[1].Texture.Width / movement.TileSize.Width;
-            movement.TileSheetSizeInTileCount.Height = m_Textures[1].Texture.Height / movement.TileSize.Height;
+            movement.TileSheetSizeInTileCount.Width = m_Textures[1].Texture.Width / FixedMovementTileSize.Width; // movement.TileSize.Width;
+            movement.TileSheetSizeInTileCount.Height = m_Textures[1].Texture.Height / FixedMovementTileSize.Height; // movement.TileSize.Height;
             movement.SelectionSizeInTileCount.Width = 1;
             movement.SelectionSizeInTileCount.Height = 1;
 

@@ -133,8 +133,8 @@ namespace DirectX11TutorialLevelEditor
                                     m_ScaledTileSize.Width, m_ScaledTileSize.Height);
 
                             Rectangle rect_src = new Rectangle(
-                                    tile_xy.X * m_MovementTileInfo.TileSize.Width, tile_xy.Y * m_MovementTileInfo.TileSize.Height,
-                                    m_MovementTileInfo.TileSize.Width, m_MovementTileInfo.TileSize.Height);
+                                    tile_xy.X * FixedMovementTileSize.Width, tile_xy.Y * FixedMovementTileSize.Height,
+                                    FixedMovementTileSize.Width, FixedMovementTileSize.Height);
 
                             Editor.spriteBatch.Draw(m_Textures[2].Texture,
                                 rect_dest, rect_src, m_Textures[2].BlendColor * 0.6f);
@@ -161,8 +161,16 @@ namespace DirectX11TutorialLevelEditor
                         curr_mode.SelectionSizeInTileCount.Width * curr_mode.TileSize.Width,
                         curr_mode.SelectionSizeInTileCount.Height * curr_mode.TileSize.Height);
 
+                if (m_TileMode == ETileMode.Movement)
+                {
+                    rect_src.X = tile_xy.X * FixedMovementTileSize.Width;
+                    rect_src.Y = tile_xy.Y * FixedMovementTileSize.Height;
+                    rect_src.Width = curr_mode.SelectionSizeInTileCount.Width * FixedMovementTileSize.Width;
+                    rect_src.Height = curr_mode.SelectionSizeInTileCount.Height * FixedMovementTileSize.Height;
+                }
+
                 Editor.spriteBatch.Draw(m_Textures[texture_index].Texture,
-                    rect_dest, rect_src, HoverColor);
+                rect_dest, rect_src, HoverColor);
             }
 
             EndDrawing();

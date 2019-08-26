@@ -22,6 +22,7 @@ namespace DirectX11TutorialLevelEditor
         protected string m_AssetDir;
         protected Color m_BGColor = Color.White;
         protected List<MGTextureData> m_Textures = new List<MGTextureData>();
+        public SSize FixedMovementTileSize;
 
         public MGSurface(string asset_dir)
         {
@@ -44,22 +45,22 @@ namespace DirectX11TutorialLevelEditor
             return blank_texture;
         }
 
-        public void AddTexture(string texture_file_name)
+        public void AddTexture(string TextureFileName)
         {
             m_Textures.Add(new MGTextureData());
 
-            Texture2D texture = Texture2D.FromStream(Editor.graphics, File.OpenRead(m_AssetDir + texture_file_name));
+            Texture2D texture = Texture2D.FromStream(Editor.graphics, File.OpenRead(m_AssetDir + TextureFileName));
 
             m_Textures.ElementAt(m_Textures.Count - 1).Texture = texture;
             m_Textures.ElementAt(m_Textures.Count - 1).Rect = new Rectangle(0, 0, texture.Width, texture.Height);
         }
 
-        public void AddTexture(Texture2D texture)
+        public void AddTexture(Texture2D Texture)
         {
             m_Textures.Add(new MGTextureData());
 
-            m_Textures.ElementAt(m_Textures.Count - 1).Texture = texture;
-            m_Textures.ElementAt(m_Textures.Count - 1).Rect = new Rectangle(0, 0, texture.Width, texture.Height);
+            m_Textures.ElementAt(m_Textures.Count - 1).Texture = Texture;
+            m_Textures.ElementAt(m_Textures.Count - 1).Rect = new Rectangle(0, 0, Texture.Width, Texture.Height);
         }
 
         protected override void Initialize()

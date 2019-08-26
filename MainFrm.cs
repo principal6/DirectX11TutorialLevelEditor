@@ -109,11 +109,10 @@ namespace DirectX11TutorialLevelEditor
     {
         static private readonly string KMainFormTitle = "DirectX11Tutorial Level Editor";
         static private readonly string KDefaultLevelName = "level_new";
+        static private readonly SSize KDefaultTileSize = new SSize(64, 64);
+        static private readonly SSize KDefaultLevelSize = new SSize(5, 3);
 
         private readonly string KAssetDir;
-        private readonly SSize KDefaultTileSize = new SSize(64, 64);
-        private readonly SSize KDefaultLevelSize = new SSize(5, 3);
-
         private readonly MGSurfaceTile SurfaceTile;
         private readonly MGSurfaceLevel SurfaceLevel;
 
@@ -121,6 +120,17 @@ namespace DirectX11TutorialLevelEditor
         private string m_LevelName = KDefaultLevelName;
 
         private SPosition m_MouseDownPos;
+
+        private STileModeInfo m_DesignTileInfo = new STileModeInfo
+        {
+            TileSheetFileName = "grass_64x64.png",
+            TileSize = KDefaultTileSize
+        };
+        private STileModeInfo m_MovementTileInfo = new STileModeInfo
+        {
+            TileSheetFileName = "movement_platformer_64x64.png",
+            TileSize = KDefaultTileSize
+        };
 
         public MainFrm()
         {
@@ -131,13 +141,15 @@ namespace DirectX11TutorialLevelEditor
             SurfaceTile = new MGSurfaceTile(KAssetDir)
             {
                 Parent = SplitViews.Panel1,
-                Dock = DockStyle.Fill
+                Dock = DockStyle.Fill,
+                FixedMovementTileSize = KDefaultTileSize
             };
 
             SurfaceLevel = new MGSurfaceLevel(KAssetDir)
             {
                 Parent = SplitViews.Panel2,
-                Dock = DockStyle.Fill
+                Dock = DockStyle.Fill,
+                FixedMovementTileSize = KDefaultTileSize
             };
 
             SurfaceTile.MouseMove += SurfaceTile_MouseMove;
@@ -152,23 +164,9 @@ namespace DirectX11TutorialLevelEditor
 
         private void MainFrm_Load(object sender, EventArgs e)
         {
-            STileModeInfo design_tile_info = new STileModeInfo
-            {
-                TileSheetFileName = "grass_64x64.png",
-                TileSize = KDefaultTileSize
-            };
+            SurfaceTile.SetTileSheetTextures(ref m_DesignTileInfo, ref m_MovementTileInfo);
 
-            STileModeInfo movement_tile_info = new STileModeInfo
-            {
-                TileSheetFileName = "movement_platformer_64x64.png",
-                TileSize = KDefaultTileSize
-            };
-
-            SurfaceTile.SetTileSheetTextures(ref design_tile_info, ref movement_tile_info);
-
-            SurfaceLevel.CreateLevel(KDefaultLevelSize.Width, KDefaultLevelSize.Height, design_tile_info, movement_tile_info);
-
-            LabelScale.Text = "배율: 100 %";
+            SurfaceLevel.CreateLevel(KDefaultLevelSize.Width, KDefaultLevelSize.Height, m_DesignTileInfo, m_MovementTileInfo);
 
             UpdateMainFrmTitle();
 
@@ -299,6 +297,8 @@ namespace DirectX11TutorialLevelEditor
 
             SurfaceLevel.Invalidate();
 
+            LabelScale.Text = "배율: " + (int)(SurfaceLevel.GetScaleFactor() * 100) + " %";
+
             LabelLevelName.Text = "레벨 이름: " + m_LevelName;
 
             LabelLevelSize.Left = SplitViews.Panel2.Width - LabelLevelSize.Width;
@@ -355,11 +355,9 @@ namespace DirectX11TutorialLevelEditor
                 }
             }
 
-            LabelScale.Text = "배율: " + (int)(factor * 100) + " %";
-
             SurfaceLevel.SetScaleFactor(factor);
 
-            SurfaceLevel.Invalidate();
+            UpdateViews();
         }
 
         private void TabTileView_SelectedIndexChanged(object sender, EventArgs e)
@@ -393,21 +391,9 @@ namespace DirectX11TutorialLevelEditor
 
                 m_TileMode = ETileMode.Design;
 
-                STileModeInfo design_tile_info = new STileModeInfo
-                {
-                    TileSheetFileName = "grass_64x64.png",
-                    TileSize = KDefaultTileSize
-                };
+                SurfaceTile.SetTileSheetTextures(ref m_DesignTileInfo, ref m_MovementTileInfo);
 
-                STileModeInfo movement_tile_info = new STileModeInfo
-                {
-                    TileSheetFileName = "movement_platformer_64x64.png",
-                    TileSize = KDefaultTileSize
-                };
-
-                SurfaceTile.SetTileSheetTextures(ref design_tile_info, ref movement_tile_info);
-
-                SurfaceLevel.CreateLevel(level_size_x, level_size_y, design_tile_info, movement_tile_info);
+                SurfaceLevel.CreateLevel(level_size_x, level_size_y, m_DesignTileInfo, m_MovementTileInfo);
 
                 UpdateMainFrmTitle();
 
@@ -530,27 +516,17 @@ namespace DirectX11TutorialLevelEditor
             int level_size_x;
             int level_size_y;
             {
-                STileModeInfo design_tile_info = new STileModeInfo
-                {
-                    TileSize = KDefaultTileSize
-                };
-
-                STileModeInfo movement_tile_info = new STileModeInfo
-                {
-                    TileSize = KDefaultTileSize
-                };
-
                 XmlElement level_info = (XmlElement)root.ChildNodes[0];
 
                 XmlAttribute name = level_info.Attributes[0];
                 m_LevelName = name.Value;
 
                 XmlAttribute tile_size_width = level_info.Attributes[1];
-                design_tile_info.TileSize.Width = movement_tile_info.TileSize.Width =
+                m_DesignTileInfo.TileSize.Width = m_MovementTileInfo.TileSize.Width =
                     Convert.ToInt32(tile_size_width.Value);
 
                 XmlAttribute tile_size_height = level_info.Attributes[2];
-                design_tile_info.TileSize.Height = movement_tile_info.TileSize.Height =
+                m_DesignTileInfo.TileSize.Height = m_MovementTileInfo.TileSize.Height =
                     Convert.ToInt32(tile_size_height.Value);
 
                 XmlAttribute level_size_width = level_info.Attributes[3];
@@ -560,16 +536,15 @@ namespace DirectX11TutorialLevelEditor
                 level_size_y = Convert.ToInt32(level_size_height.Value);
 
                 XmlAttribute design_tileset = level_info.Attributes[5];
-                design_tile_info.TileSheetFileName = design_tileset.Value;
+                m_DesignTileInfo.TileSheetFileName = design_tileset.Value;
 
                 XmlAttribute movement_tileset = level_info.Attributes[6];
-                movement_tile_info.TileSheetFileName = movement_tileset.Value;
+                m_MovementTileInfo.TileSheetFileName = movement_tileset.Value;
 
 
+                SurfaceTile.SetTileSheetTextures(ref m_DesignTileInfo, ref m_MovementTileInfo);
 
-                SurfaceTile.SetTileSheetTextures(ref design_tile_info, ref movement_tile_info);
-
-                SurfaceLevel.CreateLevel(level_size_x, level_size_y, design_tile_info, movement_tile_info);
+                SurfaceLevel.CreateLevel(level_size_x, level_size_y, m_DesignTileInfo, m_MovementTileInfo);
 
 
                 ref int[,] ref_design_tiles = ref SurfaceLevel.GetDesignTilesRef();
@@ -627,6 +602,50 @@ namespace DirectX11TutorialLevelEditor
             }
 
             this.Text = KMainFormTitle + " : " + m_LevelName;
+        }
+
+        private void 불러오기ToolStripMenuItem1_Click(object sender, EventArgs e)
+        {
+            dlgOpenFile.Filter = "Tileset texture (.png)|*.png";
+            dlgOpenFile.InitialDirectory = KAssetDir;
+            dlgOpenFile.Title = "불러오기";
+            dlgOpenFile.DefaultExt = "png";
+
+            DialogResult result = dlgOpenFile.ShowDialog();
+
+            if (result == DialogResult.OK)
+            {
+                string[] file_names = dlgOpenFile.FileName.Split('\\');
+
+                m_DesignTileInfo.TileSheetFileName = file_names[file_names.Length - 1];
+
+                SurfaceTile.SetTileSheetTextures(ref m_DesignTileInfo, ref m_MovementTileInfo);
+
+                SurfaceLevel.CreateLevel(KDefaultLevelSize.Width, KDefaultLevelSize.Height, m_DesignTileInfo, m_MovementTileInfo);
+
+                UpdateMainFrmTitle();
+
+                UpdateViews();
+            }
+        }
+
+        private void 크기설정ToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            NewTilesetSize new_tileset_size = new NewTilesetSize();
+
+            if (new_tileset_size.ShowDialog() == DialogResult.OK)
+            {
+                m_DesignTileInfo.TileSize.Width = m_MovementTileInfo.TileSize.Width = Convert.ToInt32(new_tileset_size.Controls["numSizeX"].Text);
+                m_DesignTileInfo.TileSize.Height = m_MovementTileInfo.TileSize.Height = Convert.ToInt32(new_tileset_size.Controls["numSizeY"].Text);
+
+                SurfaceTile.SetTileSheetTextures(ref m_DesignTileInfo, ref m_MovementTileInfo);
+
+                SurfaceLevel.CreateLevel(KDefaultLevelSize.Width, KDefaultLevelSize.Height, m_DesignTileInfo, m_MovementTileInfo);
+
+                UpdateMainFrmTitle();
+
+                UpdateViews();
+            }
         }
     }
 }
