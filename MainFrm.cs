@@ -299,7 +299,10 @@ namespace DirectX11TutorialLevelEditor
 
             SurfaceLevel.Invalidate();
 
+            LabelLevelName.Text = "레벨 이름: " + m_LevelName;
+
             LabelLevelSize.Left = SplitViews.Panel2.Width - LabelLevelSize.Width;
+            LabelLevelSize.Text = "레벨 크기: " + SurfaceLevel.GetLevelSize().Width + " x " + SurfaceLevel.GetLevelSize().Height;
         }
 
         private void TileViewHScrollBar_Scroll(object sender, ScrollEventArgs e)
@@ -405,9 +408,6 @@ namespace DirectX11TutorialLevelEditor
                 SurfaceTile.SetTileSheetTextures(ref design_tile_info, ref movement_tile_info);
 
                 SurfaceLevel.CreateLevel(level_size_x, level_size_y, design_tile_info, movement_tile_info);
-
-                LabelLevelName.Text = "레벨 이름: " + m_LevelName;
-                LabelLevelSize.Text = "레벨 크기: " + level_size_x + " x " + level_size_y;
 
                 UpdateMainFrmTitle();
 
