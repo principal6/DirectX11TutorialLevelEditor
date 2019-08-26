@@ -77,6 +77,16 @@
             // numSizeX
             // 
             this.numSizeX.Location = new System.Drawing.Point(87, 38);
+            this.numSizeX.Maximum = new decimal(new int[] {
+            500,
+            0,
+            0,
+            0});
+            this.numSizeX.Minimum = new decimal(new int[] {
+            3,
+            0,
+            0,
+            0});
             this.numSizeX.Name = "numSizeX";
             this.numSizeX.Size = new System.Drawing.Size(100, 21);
             this.numSizeX.TabIndex = 4;
@@ -89,6 +99,16 @@
             // numSizeY
             // 
             this.numSizeY.Location = new System.Drawing.Point(87, 68);
+            this.numSizeY.Maximum = new decimal(new int[] {
+            500,
+            0,
+            0,
+            0});
+            this.numSizeY.Minimum = new decimal(new int[] {
+            3,
+            0,
+            0,
+            0});
             this.numSizeY.Name = "numSizeY";
             this.numSizeY.Size = new System.Drawing.Size(100, 21);
             this.numSizeY.TabIndex = 5;

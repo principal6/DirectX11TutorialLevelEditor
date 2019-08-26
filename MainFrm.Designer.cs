@@ -32,6 +32,9 @@
             this.TabTileView = new System.Windows.Forms.TabControl();
             this.TabDesign = new System.Windows.Forms.TabPage();
             this.TabMovement = new System.Windows.Forms.TabPage();
+            this.LabelLevelSize = new System.Windows.Forms.Label();
+            this.LabelLevelName = new System.Windows.Forms.Label();
+            this.LabelScale = new System.Windows.Forms.Label();
             this.MainMenu = new System.Windows.Forms.MenuStrip();
             this.맵ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.새로만들기ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -46,6 +49,7 @@
             this.dlgOpenFile = new System.Windows.Forms.OpenFileDialog();
             ((System.ComponentModel.ISupportInitialize)(this.SplitTab)).BeginInit();
             this.SplitTab.Panel1.SuspendLayout();
+            this.SplitTab.Panel2.SuspendLayout();
             this.SplitTab.SuspendLayout();
             this.TabTileView.SuspendLayout();
             this.MainMenu.SuspendLayout();
@@ -64,6 +68,12 @@
             // SplitTab.Panel1
             // 
             this.SplitTab.Panel1.Controls.Add(this.TabTileView);
+            // 
+            // SplitTab.Panel2
+            // 
+            this.SplitTab.Panel2.Controls.Add(this.LabelLevelSize);
+            this.SplitTab.Panel2.Controls.Add(this.LabelLevelName);
+            this.SplitTab.Panel2.Controls.Add(this.LabelScale);
             this.SplitTab.Size = new System.Drawing.Size(800, 21);
             this.SplitTab.SplitterDistance = 266;
             this.SplitTab.TabIndex = 0;
@@ -99,6 +109,33 @@
             this.TabMovement.TabIndex = 1;
             this.TabMovement.Text = "움직임 타일";
             this.TabMovement.UseVisualStyleBackColor = true;
+            // 
+            // LabelLevelSize
+            // 
+            this.LabelLevelSize.Location = new System.Drawing.Point(402, 6);
+            this.LabelLevelSize.Name = "LabelLevelSize";
+            this.LabelLevelSize.Size = new System.Drawing.Size(122, 12);
+            this.LabelLevelSize.TabIndex = 2;
+            this.LabelLevelSize.Text = "레벨 크기: 5 x 3";
+            this.LabelLevelSize.TextAlign = System.Drawing.ContentAlignment.TopRight;
+            // 
+            // LabelLevelName
+            // 
+            this.LabelLevelName.AutoSize = true;
+            this.LabelLevelName.Location = new System.Drawing.Point(90, 6);
+            this.LabelLevelName.Name = "LabelLevelName";
+            this.LabelLevelName.Size = new System.Drawing.Size(121, 12);
+            this.LabelLevelName.TabIndex = 1;
+            this.LabelLevelName.Text = "레벨 이름: level_new";
+            // 
+            // LabelScale
+            // 
+            this.LabelScale.AutoSize = true;
+            this.LabelScale.Location = new System.Drawing.Point(3, 6);
+            this.LabelScale.Name = "LabelScale";
+            this.LabelScale.Size = new System.Drawing.Size(69, 12);
+            this.LabelScale.TabIndex = 0;
+            this.LabelScale.Text = "배율: 100 %";
             // 
             // MainMenu
             // 
@@ -224,6 +261,8 @@
             this.KeyDown += new System.Windows.Forms.KeyEventHandler(this.MainFrm_KeyDown);
             this.Resize += new System.EventHandler(this.MainFrm_Resize);
             this.SplitTab.Panel1.ResumeLayout(false);
+            this.SplitTab.Panel2.ResumeLayout(false);
+            this.SplitTab.Panel2.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.SplitTab)).EndInit();
             this.SplitTab.ResumeLayout(false);
             this.TabTileView.ResumeLayout(false);
@@ -256,6 +295,9 @@
         private System.Windows.Forms.VScrollBar LevelViewVScrollBar;
         private System.Windows.Forms.SaveFileDialog dlgSaveFile;
         private System.Windows.Forms.OpenFileDialog dlgOpenFile;
+        private System.Windows.Forms.Label LabelScale;
+        private System.Windows.Forms.Label LabelLevelSize;
+        private System.Windows.Forms.Label LabelLevelName;
     }
 }
 
