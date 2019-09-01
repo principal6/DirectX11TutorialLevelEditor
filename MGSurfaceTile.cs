@@ -33,7 +33,9 @@ namespace DirectX11TutorialLevelEditor
             int texture_index = GetCurrentTileModeTextureIndex();
             ref STileModeInfo tile_mode = ref GetCurrentTileModeInfoRef();
 
-            Rectangle scaled_rect_dest = new Rectangle(0, 0, 
+            Rectangle scaled_rect_dest = new Rectangle(
+                -tile_mode.TileSelectionOffset.X * tile_mode.TileSize.Width,
+                -tile_mode.TileSelectionOffset.Y * tile_mode.TileSize.Height,
                 tile_mode.TileSheetSizeInTileCount.Width * tile_mode.TileSize.Width,
                 tile_mode.TileSheetSizeInTileCount.Height * tile_mode.TileSize.Height);
 
@@ -41,7 +43,6 @@ namespace DirectX11TutorialLevelEditor
                 scaled_rect_dest, m_Textures[texture_index].Rect,
                 m_Textures[texture_index].BlendColor * ((float)m_Textures[texture_index].BlendColor.A / 255.0f));
 
-            
 
             if ((tile_mode.SelectionSizeInTileCount.Width >= 1) || (tile_mode.SelectionSizeInTileCount.Height >= 1))
             {
@@ -179,9 +180,6 @@ namespace DirectX11TutorialLevelEditor
 
             m_Textures[2].Rect.X = (-tile_mode.TileSelectionOffset.X + tile_mode.SelectionOrigin.X) * tile_mode.TileSize.Width;
             m_Textures[2].Rect.Y = (-tile_mode.TileSelectionOffset.Y + tile_mode.SelectionOrigin.Y) * tile_mode.TileSize.Height;
-
-            m_Textures[0].Rect.X = -tile_mode.TileSelectionOffset.X * tile_mode.TileSize.Width;
-            m_Textures[0].Rect.Y = -tile_mode.TileSelectionOffset.Y * tile_mode.TileSize.Height;
 
             Invalidate();
         }
