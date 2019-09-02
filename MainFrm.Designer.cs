@@ -32,6 +32,7 @@
             this.TabTileView = new System.Windows.Forms.TabControl();
             this.TabDesign = new System.Windows.Forms.TabPage();
             this.TabMovement = new System.Windows.Forms.TabPage();
+            this.TabObjectSet = new System.Windows.Forms.TabPage();
             this.LabelLevelSize = new System.Windows.Forms.Label();
             this.LabelLevelName = new System.Windows.Forms.Label();
             this.LabelScale = new System.Windows.Forms.Label();
@@ -40,16 +41,22 @@
             this.새로만들기ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.불러오기ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.저장하기ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.타일ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.불러오기ToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
+            this.크기설정ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.오브젝트ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.오브젝트셋지정ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.SplitViews = new System.Windows.Forms.SplitContainer();
+            this.SplitObjectView = new System.Windows.Forms.SplitContainer();
+            this.lbInsertedObjests = new System.Windows.Forms.ListBox();
+            this.SplitObjectSet = new System.Windows.Forms.SplitContainer();
+            this.lbObjectSet = new System.Windows.Forms.ListBox();
             this.TileViewHScrollBar = new System.Windows.Forms.HScrollBar();
             this.TileViewVScrollBar = new System.Windows.Forms.VScrollBar();
             this.LevelViewHScrollBar = new System.Windows.Forms.HScrollBar();
             this.LevelViewVScrollBar = new System.Windows.Forms.VScrollBar();
             this.dlgSaveFile = new System.Windows.Forms.SaveFileDialog();
             this.dlgOpenFile = new System.Windows.Forms.OpenFileDialog();
-            this.타일ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.불러오기ToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
-            this.크기설정ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             ((System.ComponentModel.ISupportInitialize)(this.SplitTab)).BeginInit();
             this.SplitTab.Panel1.SuspendLayout();
             this.SplitTab.Panel2.SuspendLayout();
@@ -60,6 +67,13 @@
             this.SplitViews.Panel1.SuspendLayout();
             this.SplitViews.Panel2.SuspendLayout();
             this.SplitViews.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.SplitObjectView)).BeginInit();
+            this.SplitObjectView.Panel1.SuspendLayout();
+            this.SplitObjectView.Panel2.SuspendLayout();
+            this.SplitObjectView.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.SplitObjectSet)).BeginInit();
+            this.SplitObjectSet.Panel2.SuspendLayout();
+            this.SplitObjectSet.SuspendLayout();
             this.SuspendLayout();
             // 
             // SplitTab
@@ -85,6 +99,7 @@
             // 
             this.TabTileView.Controls.Add(this.TabDesign);
             this.TabTileView.Controls.Add(this.TabMovement);
+            this.TabTileView.Controls.Add(this.TabObjectSet);
             this.TabTileView.Dock = System.Windows.Forms.DockStyle.Top;
             this.TabTileView.Location = new System.Drawing.Point(0, 0);
             this.TabTileView.Name = "TabTileView";
@@ -112,6 +127,16 @@
             this.TabMovement.TabIndex = 1;
             this.TabMovement.Text = "움직임 타일";
             this.TabMovement.UseVisualStyleBackColor = true;
+            // 
+            // TabObjectSet
+            // 
+            this.TabObjectSet.Location = new System.Drawing.Point(4, 22);
+            this.TabObjectSet.Name = "TabObjectSet";
+            this.TabObjectSet.Padding = new System.Windows.Forms.Padding(3);
+            this.TabObjectSet.Size = new System.Drawing.Size(258, 0);
+            this.TabObjectSet.TabIndex = 2;
+            this.TabObjectSet.Text = "오브젝트";
+            this.TabObjectSet.UseVisualStyleBackColor = true;
             // 
             // LabelLevelSize
             // 
@@ -144,7 +169,8 @@
             // 
             this.MainMenu.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.맵ToolStripMenuItem,
-            this.타일ToolStripMenuItem});
+            this.타일ToolStripMenuItem,
+            this.오브젝트ToolStripMenuItem});
             this.MainMenu.Location = new System.Drawing.Point(0, 0);
             this.MainMenu.Name = "MainMenu";
             this.MainMenu.Size = new System.Drawing.Size(800, 24);
@@ -165,7 +191,7 @@
             // 
             this.새로만들기ToolStripMenuItem.Name = "새로만들기ToolStripMenuItem";
             this.새로만들기ToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.N)));
-            this.새로만들기ToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.새로만들기ToolStripMenuItem.Size = new System.Drawing.Size(177, 22);
             this.새로만들기ToolStripMenuItem.Text = "새로만들기";
             this.새로만들기ToolStripMenuItem.Click += new System.EventHandler(this.새로만들기ToolStripMenuItem_Click);
             // 
@@ -173,7 +199,7 @@
             // 
             this.불러오기ToolStripMenuItem.Name = "불러오기ToolStripMenuItem";
             this.불러오기ToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.O)));
-            this.불러오기ToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.불러오기ToolStripMenuItem.Size = new System.Drawing.Size(177, 22);
             this.불러오기ToolStripMenuItem.Text = "불러오기";
             this.불러오기ToolStripMenuItem.Click += new System.EventHandler(this.불러오기ToolStripMenuItem_Click);
             // 
@@ -181,74 +207,9 @@
             // 
             this.저장하기ToolStripMenuItem.Name = "저장하기ToolStripMenuItem";
             this.저장하기ToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.S)));
-            this.저장하기ToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.저장하기ToolStripMenuItem.Size = new System.Drawing.Size(177, 22);
             this.저장하기ToolStripMenuItem.Text = "저장하기";
             this.저장하기ToolStripMenuItem.Click += new System.EventHandler(this.저장하기ToolStripMenuItem_Click);
-            // 
-            // SplitViews
-            // 
-            this.SplitViews.Dock = System.Windows.Forms.DockStyle.Top;
-            this.SplitViews.Location = new System.Drawing.Point(0, 45);
-            this.SplitViews.Name = "SplitViews";
-            // 
-            // SplitViews.Panel1
-            // 
-            this.SplitViews.Panel1.Controls.Add(this.TileViewHScrollBar);
-            this.SplitViews.Panel1.Controls.Add(this.TileViewVScrollBar);
-            this.SplitViews.Panel1.Resize += new System.EventHandler(this.SplitViews_Panel1_Resize);
-            // 
-            // SplitViews.Panel2
-            // 
-            this.SplitViews.Panel2.Controls.Add(this.LevelViewHScrollBar);
-            this.SplitViews.Panel2.Controls.Add(this.LevelViewVScrollBar);
-            this.SplitViews.Panel2.Resize += new System.EventHandler(this.SplitViews_Panel2_Resize);
-            this.SplitViews.Size = new System.Drawing.Size(800, 190);
-            this.SplitViews.SplitterDistance = 266;
-            this.SplitViews.TabIndex = 3;
-            // 
-            // TileViewHScrollBar
-            // 
-            this.TileViewHScrollBar.Dock = System.Windows.Forms.DockStyle.Bottom;
-            this.TileViewHScrollBar.Location = new System.Drawing.Point(0, 173);
-            this.TileViewHScrollBar.Name = "TileViewHScrollBar";
-            this.TileViewHScrollBar.Size = new System.Drawing.Size(249, 17);
-            this.TileViewHScrollBar.TabIndex = 1;
-            this.TileViewHScrollBar.Scroll += new System.Windows.Forms.ScrollEventHandler(this.TileViewHScrollBar_Scroll);
-            // 
-            // TileViewVScrollBar
-            // 
-            this.TileViewVScrollBar.Dock = System.Windows.Forms.DockStyle.Right;
-            this.TileViewVScrollBar.Location = new System.Drawing.Point(249, 0);
-            this.TileViewVScrollBar.Name = "TileViewVScrollBar";
-            this.TileViewVScrollBar.Size = new System.Drawing.Size(17, 190);
-            this.TileViewVScrollBar.TabIndex = 0;
-            this.TileViewVScrollBar.Scroll += new System.Windows.Forms.ScrollEventHandler(this.TileViewVScrollBar_Scroll);
-            // 
-            // LevelViewHScrollBar
-            // 
-            this.LevelViewHScrollBar.Dock = System.Windows.Forms.DockStyle.Bottom;
-            this.LevelViewHScrollBar.Location = new System.Drawing.Point(0, 173);
-            this.LevelViewHScrollBar.Name = "LevelViewHScrollBar";
-            this.LevelViewHScrollBar.Size = new System.Drawing.Size(513, 17);
-            this.LevelViewHScrollBar.TabIndex = 2;
-            this.LevelViewHScrollBar.Scroll += new System.Windows.Forms.ScrollEventHandler(this.LevelViewHScrollBar_Scroll);
-            // 
-            // LevelViewVScrollBar
-            // 
-            this.LevelViewVScrollBar.Dock = System.Windows.Forms.DockStyle.Right;
-            this.LevelViewVScrollBar.Location = new System.Drawing.Point(513, 0);
-            this.LevelViewVScrollBar.Name = "LevelViewVScrollBar";
-            this.LevelViewVScrollBar.Size = new System.Drawing.Size(17, 190);
-            this.LevelViewVScrollBar.TabIndex = 1;
-            this.LevelViewVScrollBar.Scroll += new System.Windows.Forms.ScrollEventHandler(this.LevelViewVScrollBar_Scroll);
-            // 
-            // dlgSaveFile
-            // 
-            this.dlgSaveFile.RestoreDirectory = true;
-            // 
-            // dlgOpenFile
-            // 
-            this.dlgOpenFile.FileName = "openFileDialog1";
             // 
             // 타일ToolStripMenuItem
             // 
@@ -263,17 +224,153 @@
             // 
             this.불러오기ToolStripMenuItem1.Name = "불러오기ToolStripMenuItem1";
             this.불러오기ToolStripMenuItem1.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Alt | System.Windows.Forms.Keys.O)));
-            this.불러오기ToolStripMenuItem1.Size = new System.Drawing.Size(180, 22);
+            this.불러오기ToolStripMenuItem1.Size = new System.Drawing.Size(165, 22);
             this.불러오기ToolStripMenuItem1.Text = "불러오기";
-            this.불러오기ToolStripMenuItem1.Click += new System.EventHandler(this.불러오기ToolStripMenuItem1_Click);
+            this.불러오기ToolStripMenuItem1.Click += new System.EventHandler(this.타일불러오기ToolStripMenuItem_Click);
             // 
             // 크기설정ToolStripMenuItem
             // 
             this.크기설정ToolStripMenuItem.Name = "크기설정ToolStripMenuItem";
             this.크기설정ToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Alt | System.Windows.Forms.Keys.N)));
-            this.크기설정ToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.크기설정ToolStripMenuItem.Size = new System.Drawing.Size(165, 22);
             this.크기설정ToolStripMenuItem.Text = "크기 설정";
-            this.크기설정ToolStripMenuItem.Click += new System.EventHandler(this.크기설정ToolStripMenuItem_Click);
+            this.크기설정ToolStripMenuItem.Click += new System.EventHandler(this.타일크기설정ToolStripMenuItem_Click);
+            // 
+            // 오브젝트ToolStripMenuItem
+            // 
+            this.오브젝트ToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.오브젝트셋지정ToolStripMenuItem});
+            this.오브젝트ToolStripMenuItem.Name = "오브젝트ToolStripMenuItem";
+            this.오브젝트ToolStripMenuItem.Size = new System.Drawing.Size(67, 20);
+            this.오브젝트ToolStripMenuItem.Text = "오브젝트";
+            // 
+            // 오브젝트셋지정ToolStripMenuItem
+            // 
+            this.오브젝트셋지정ToolStripMenuItem.Name = "오브젝트셋지정ToolStripMenuItem";
+            this.오브젝트셋지정ToolStripMenuItem.Size = new System.Drawing.Size(162, 22);
+            this.오브젝트셋지정ToolStripMenuItem.Text = "오브젝트셋 지정";
+            this.오브젝트셋지정ToolStripMenuItem.Click += new System.EventHandler(this.오브젝트셋지정ToolStripMenuItem_Click);
+            // 
+            // SplitViews
+            // 
+            this.SplitViews.Dock = System.Windows.Forms.DockStyle.Top;
+            this.SplitViews.Location = new System.Drawing.Point(0, 45);
+            this.SplitViews.Name = "SplitViews";
+            // 
+            // SplitViews.Panel1
+            // 
+            this.SplitViews.Panel1.Controls.Add(this.SplitObjectView);
+            this.SplitViews.Panel1.Controls.Add(this.TileViewHScrollBar);
+            this.SplitViews.Panel1.Controls.Add(this.TileViewVScrollBar);
+            this.SplitViews.Panel1.Resize += new System.EventHandler(this.SplitViews_Panel1_Resize);
+            // 
+            // SplitViews.Panel2
+            // 
+            this.SplitViews.Panel2.Controls.Add(this.LevelViewHScrollBar);
+            this.SplitViews.Panel2.Controls.Add(this.LevelViewVScrollBar);
+            this.SplitViews.Panel2.Resize += new System.EventHandler(this.SplitViews_Panel2_Resize);
+            this.SplitViews.Size = new System.Drawing.Size(800, 359);
+            this.SplitViews.SplitterDistance = 266;
+            this.SplitViews.TabIndex = 3;
+            // 
+            // SplitObjectView
+            // 
+            this.SplitObjectView.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.SplitObjectView.Location = new System.Drawing.Point(0, 0);
+            this.SplitObjectView.Name = "SplitObjectView";
+            this.SplitObjectView.Orientation = System.Windows.Forms.Orientation.Horizontal;
+            // 
+            // SplitObjectView.Panel1
+            // 
+            this.SplitObjectView.Panel1.Controls.Add(this.lbInsertedObjests);
+            // 
+            // SplitObjectView.Panel2
+            // 
+            this.SplitObjectView.Panel2.Controls.Add(this.SplitObjectSet);
+            this.SplitObjectView.Size = new System.Drawing.Size(249, 342);
+            this.SplitObjectView.SplitterDistance = 121;
+            this.SplitObjectView.TabIndex = 5;
+            // 
+            // lbInsertedObjests
+            // 
+            this.lbInsertedObjests.Dock = System.Windows.Forms.DockStyle.Left;
+            this.lbInsertedObjests.FormattingEnabled = true;
+            this.lbInsertedObjests.ItemHeight = 12;
+            this.lbInsertedObjests.Location = new System.Drawing.Point(0, 0);
+            this.lbInsertedObjests.Name = "lbInsertedObjests";
+            this.lbInsertedObjests.Size = new System.Drawing.Size(172, 121);
+            this.lbInsertedObjests.TabIndex = 1;
+            this.lbInsertedObjests.SelectedIndexChanged += new System.EventHandler(this.LbInsertedObjests_SelectedIndexChanged);
+            this.lbInsertedObjests.KeyDown += new System.Windows.Forms.KeyEventHandler(this.LbInsertedObjests_KeyDown);
+            // 
+            // SplitObjectSet
+            // 
+            this.SplitObjectSet.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.SplitObjectSet.Location = new System.Drawing.Point(0, 0);
+            this.SplitObjectSet.Name = "SplitObjectSet";
+            this.SplitObjectSet.Orientation = System.Windows.Forms.Orientation.Horizontal;
+            // 
+            // SplitObjectSet.Panel2
+            // 
+            this.SplitObjectSet.Panel2.Controls.Add(this.lbObjectSet);
+            this.SplitObjectSet.Size = new System.Drawing.Size(249, 217);
+            this.SplitObjectSet.SplitterDistance = 83;
+            this.SplitObjectSet.TabIndex = 1;
+            // 
+            // lbObjectSet
+            // 
+            this.lbObjectSet.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.lbObjectSet.FormattingEnabled = true;
+            this.lbObjectSet.ItemHeight = 12;
+            this.lbObjectSet.Location = new System.Drawing.Point(0, 0);
+            this.lbObjectSet.Name = "lbObjectSet";
+            this.lbObjectSet.Size = new System.Drawing.Size(249, 130);
+            this.lbObjectSet.TabIndex = 1;
+            this.lbObjectSet.SelectedIndexChanged += new System.EventHandler(this.LbObjectSet_SelectedIndexChanged);
+            // 
+            // TileViewHScrollBar
+            // 
+            this.TileViewHScrollBar.Dock = System.Windows.Forms.DockStyle.Bottom;
+            this.TileViewHScrollBar.Location = new System.Drawing.Point(0, 342);
+            this.TileViewHScrollBar.Name = "TileViewHScrollBar";
+            this.TileViewHScrollBar.Size = new System.Drawing.Size(249, 17);
+            this.TileViewHScrollBar.TabIndex = 1;
+            this.TileViewHScrollBar.Scroll += new System.Windows.Forms.ScrollEventHandler(this.TileViewHScrollBar_Scroll);
+            // 
+            // TileViewVScrollBar
+            // 
+            this.TileViewVScrollBar.Dock = System.Windows.Forms.DockStyle.Right;
+            this.TileViewVScrollBar.Location = new System.Drawing.Point(249, 0);
+            this.TileViewVScrollBar.Name = "TileViewVScrollBar";
+            this.TileViewVScrollBar.Size = new System.Drawing.Size(17, 359);
+            this.TileViewVScrollBar.TabIndex = 0;
+            this.TileViewVScrollBar.Scroll += new System.Windows.Forms.ScrollEventHandler(this.TileViewVScrollBar_Scroll);
+            // 
+            // LevelViewHScrollBar
+            // 
+            this.LevelViewHScrollBar.Dock = System.Windows.Forms.DockStyle.Bottom;
+            this.LevelViewHScrollBar.Location = new System.Drawing.Point(0, 342);
+            this.LevelViewHScrollBar.Name = "LevelViewHScrollBar";
+            this.LevelViewHScrollBar.Size = new System.Drawing.Size(513, 17);
+            this.LevelViewHScrollBar.TabIndex = 2;
+            this.LevelViewHScrollBar.Scroll += new System.Windows.Forms.ScrollEventHandler(this.LevelViewHScrollBar_Scroll);
+            // 
+            // LevelViewVScrollBar
+            // 
+            this.LevelViewVScrollBar.Dock = System.Windows.Forms.DockStyle.Right;
+            this.LevelViewVScrollBar.Location = new System.Drawing.Point(513, 0);
+            this.LevelViewVScrollBar.Name = "LevelViewVScrollBar";
+            this.LevelViewVScrollBar.Size = new System.Drawing.Size(17, 359);
+            this.LevelViewVScrollBar.TabIndex = 1;
+            this.LevelViewVScrollBar.Scroll += new System.Windows.Forms.ScrollEventHandler(this.LevelViewVScrollBar_Scroll);
+            // 
+            // dlgSaveFile
+            // 
+            this.dlgSaveFile.RestoreDirectory = true;
+            // 
+            // dlgOpenFile
+            // 
+            this.dlgOpenFile.FileName = "openFileDialog1";
             // 
             // MainFrm
             // 
@@ -301,6 +398,13 @@
             this.SplitViews.Panel2.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.SplitViews)).EndInit();
             this.SplitViews.ResumeLayout(false);
+            this.SplitObjectView.Panel1.ResumeLayout(false);
+            this.SplitObjectView.Panel2.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.SplitObjectView)).EndInit();
+            this.SplitObjectView.ResumeLayout(false);
+            this.SplitObjectSet.Panel2.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.SplitObjectSet)).EndInit();
+            this.SplitObjectSet.ResumeLayout(false);
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -330,6 +434,13 @@
         private System.Windows.Forms.ToolStripMenuItem 타일ToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem 불러오기ToolStripMenuItem1;
         private System.Windows.Forms.ToolStripMenuItem 크기설정ToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem 오브젝트ToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem 오브젝트셋지정ToolStripMenuItem;
+        private System.Windows.Forms.TabPage TabObjectSet;
+        private System.Windows.Forms.SplitContainer SplitObjectView;
+        private System.Windows.Forms.ListBox lbInsertedObjests;
+        private System.Windows.Forms.SplitContainer SplitObjectSet;
+        private System.Windows.Forms.ListBox lbObjectSet;
     }
 }
 

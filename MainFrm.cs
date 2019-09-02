@@ -8,6 +8,9 @@ using System.Xml;
 
 namespace DirectX11TutorialLevelEditor
 {
+    using ObjectSetManager = DirectX11TutorialObjectEditor.ObjectSetManager;
+    using ObjectSetElementData = DirectX11TutorialObjectEditor.ObjectSetElementData;
+
     public struct SSize
     {
         public int Width;
@@ -102,7 +105,8 @@ namespace DirectX11TutorialLevelEditor
     public enum ETileMode
     {
         Design,
-        Movement
+        Movement,
+        Object
     }
 
     public partial class MainFrm : Form
@@ -115,11 +119,14 @@ namespace DirectX11TutorialLevelEditor
         private readonly string KAssetDir;
         private readonly MGSurfaceTile SurfaceTile;
         private readonly MGSurfaceLevel SurfaceLevel;
+        private readonly MGSurfaceObjectSet SurfaceObjectSet;
 
         private ETileMode m_TileMode = ETileMode.Design;
         private string m_LevelName = KDefaultLevelName;
 
         private SPosition m_MouseDownPos;
+
+        private readonly ObjectSetManager m_ObjectSet = new ObjectSetManager();
 
         private STileModeInfo m_DesignTileInfo = new STileModeInfo
         {
@@ -136,21 +143,32 @@ namespace DirectX11TutorialLevelEditor
         {
             InitializeComponent();
 
-            KAssetDir = Directory.GetParent(Environment.CurrentDirectory).Parent.FullName + "/asset/";
-
-            SurfaceTile = new MGSurfaceTile(KAssetDir)
+            KAssetDir = Directory.GetParent(Environment.CurrentDirectory).Parent.FullName + "\\asset\\";
+            
+            SurfaceTile = new MGSurfaceTile()
             {
                 Parent = SplitViews.Panel1,
                 Dock = DockStyle.Fill,
                 FixedMovementTileSize = KDefaultTileSize
             };
-
-            SurfaceLevel = new MGSurfaceLevel(KAssetDir)
+            
+            SurfaceLevel = new MGSurfaceLevel()
             {
                 Parent = SplitViews.Panel2,
                 Dock = DockStyle.Fill,
                 FixedMovementTileSize = KDefaultTileSize
             };
+
+            SurfaceObjectSet = new MGSurfaceObjectSet()
+            {
+                Parent = SplitObjectSet.Panel1,
+                Dock = DockStyle.Fill,
+                BackgroundColor = new Color(0, 0.6f, 1.0f)
+            };
+
+            SurfaceTile.SetAssetDir(KAssetDir);
+            SurfaceLevel.SetAssetDir(KAssetDir);
+            SurfaceObjectSet.SetAssetDir(KAssetDir);
 
             SurfaceTile.MouseMove += SurfaceTile_MouseMove;
             SurfaceTile.MouseDown += SurfaceTile_MouseDown;
@@ -162,6 +180,13 @@ namespace DirectX11TutorialLevelEditor
             this.KeyPreview = true;
         }
 
+        ~MainFrm()
+        {
+            SurfaceLevel.Dispose();
+            SurfaceTile.Dispose();
+            SurfaceObjectSet.Dispose();
+        }
+
         private void MainFrm_Load(object sender, EventArgs e)
         {
             SurfaceTile.SetTileSheetTextures(ref m_DesignTileInfo, ref m_MovementTileInfo);
@@ -171,6 +196,8 @@ namespace DirectX11TutorialLevelEditor
             UpdateMainFrmTitle();
 
             UpdateViews();
+
+            SplitObjectView.Visible = false;
         }
 
         private void MainFrm_Resize(object sender, EventArgs e)
@@ -248,10 +275,38 @@ namespace DirectX11TutorialLevelEditor
             if (e.Button == MouseButtons.Left)
             {
                 SurfaceLevel.SetLevelTile(e.X, e.Y);
+
+                if (m_TileMode == ETileMode.Object)
+                {
+                    if (lbObjectSet.SelectedIndex == -1) return;
+
+                    ObjectSetElementData element = m_ObjectSet.ObjectSet.Elements[lbObjectSet.SelectedIndex];
+
+                    SPosition base_pos = SurfaceLevel.GetDesignTileScaledLevelBasePos();
+                    float scalar = SurfaceLevel.GetScaleFactor();
+
+                    CInsertedObject new_object = new CInsertedObject()
+                    {
+                        ObjectID = lbObjectSet.SelectedIndex,
+                        Position = new SPosition(
+                            (int)(e.X / scalar) - element.Size.Width / 2 + base_pos.X,
+                            (int)(e.Y / scalar) - element.Size.Height / 2 + base_pos.Y)
+                    };
+
+                    SurfaceLevel.InsertedObjects.Add(new_object);
+
+                    lbInsertedObjests.Items.Add("obj" + lbInsertedObjests.Items.Count.ToString() + 
+                        "_" + element.ElementName);
+                }
             }
             else if (e.Button == MouseButtons.Right)
             {
                 SurfaceLevel.SetLevelTile(e.X, e.Y, true);
+
+                if (m_TileMode == ETileMode.Object)
+                {
+                    lbObjectSet.ClearSelected();
+                }
             }
         }
 
@@ -273,36 +328,36 @@ namespace DirectX11TutorialLevelEditor
         {
             SplitViews.Height = this.ClientSize.Height - MainMenu.Height - SplitTab.Height;
 
+            if (SurfaceTile != null)
+            {
+                int tile_x = (SurfaceTile.GetCurrentTileSheetWidth() - TileViewHScrollBar.Width) / KDefaultTileSize.Width;
+                TileViewHScrollBar.Maximum = TileViewHScrollBar.LargeChange + tile_x;
 
-            if (SurfaceTile == null) return;
+                int tile_y = (SurfaceTile.GetCurrentTileSheetHeight() - TileViewVScrollBar.Height) / KDefaultTileSize.Height;
+                TileViewVScrollBar.Maximum = TileViewVScrollBar.LargeChange + tile_y;
 
-            int tile_x = (SurfaceTile.GetCurrentTileSheetWidth() - TileViewHScrollBar.Width) / KDefaultTileSize.Width;
-            TileViewHScrollBar.Maximum = TileViewHScrollBar.LargeChange + tile_x;
+                SurfaceTile.Invalidate();
+            }
 
-            int tile_y = (SurfaceTile.GetCurrentTileSheetHeight() - TileViewVScrollBar.Height) / KDefaultTileSize.Height;
-            TileViewVScrollBar.Maximum = TileViewVScrollBar.LargeChange + tile_y;
+            if (SurfaceLevel != null)
+            {
+                SSize level_size = SurfaceLevel.GetLevelSize();
 
-            SurfaceTile.Invalidate();
+                int level_x = (level_size.Width * KDefaultTileSize.Width - LevelViewHScrollBar.Width) / KDefaultTileSize.Width;
+                LevelViewHScrollBar.Maximum = Math.Max(LevelViewHScrollBar.LargeChange + level_x, LevelViewHScrollBar.LargeChange - 1);
 
+                int level_y = (level_size.Height * KDefaultTileSize.Height - LevelViewVScrollBar.Height) / KDefaultTileSize.Height + 1;
+                LevelViewVScrollBar.Maximum = Math.Max(LevelViewVScrollBar.LargeChange + level_y, LevelViewVScrollBar.LargeChange - 1);
 
-            if (SurfaceLevel == null) return;
+                SurfaceLevel.Invalidate();
 
-            SSize level_size = SurfaceLevel.GetLevelSize();
+                LabelScale.Text = "배율: " + (int)(SurfaceLevel.GetScaleFactor() * 100) + " %";
 
-            int level_x = (level_size.Width * KDefaultTileSize.Width - LevelViewHScrollBar.Width) / KDefaultTileSize.Width;
-            LevelViewHScrollBar.Maximum = Math.Max(LevelViewHScrollBar.LargeChange + level_x, LevelViewHScrollBar.LargeChange - 1);
+                LabelLevelName.Text = "레벨 이름: " + m_LevelName;
 
-            int level_y = (level_size.Height * KDefaultTileSize.Height - LevelViewVScrollBar.Height) / KDefaultTileSize.Height + 1;
-            LevelViewVScrollBar.Maximum = Math.Max(LevelViewVScrollBar.LargeChange + level_y, LevelViewVScrollBar.LargeChange - 1);
-
-            SurfaceLevel.Invalidate();
-
-            LabelScale.Text = "배율: " + (int)(SurfaceLevel.GetScaleFactor() * 100) + " %";
-
-            LabelLevelName.Text = "레벨 이름: " + m_LevelName;
-
-            LabelLevelSize.Left = SplitViews.Panel2.Width - LabelLevelSize.Width;
-            LabelLevelSize.Text = "레벨 크기: " + SurfaceLevel.GetLevelSize().Width + " x " + SurfaceLevel.GetLevelSize().Height;
+                LabelLevelSize.Left = SplitViews.Panel2.Width - LabelLevelSize.Width;
+                LabelLevelSize.Text = "레벨 크기: " + SurfaceLevel.GetLevelSize().Width + " x " + SurfaceLevel.GetLevelSize().Height;
+            }
         }
 
         private void TileViewHScrollBar_Scroll(object sender, ScrollEventArgs e)
@@ -362,13 +417,48 @@ namespace DirectX11TutorialLevelEditor
 
         private void TabTileView_SelectedIndexChanged(object sender, EventArgs e)
         {
-            if (TabTileView.SelectedIndex == 0)
+            switch (TabTileView.SelectedIndex)
             {
-                m_TileMode = ETileMode.Design;
-            }
-            else
-            {
-                m_TileMode = ETileMode.Movement;
+                case 0:
+                    m_TileMode = ETileMode.Design;
+
+                    SurfaceTile.Visible = true;
+                    SurfaceObjectSet.Visible = false;
+                    SurfaceLevel.ShouldDrawTileOverlay = true;
+
+                    SplitObjectView.Visible = false;
+                    TileViewHScrollBar.Visible = true;
+                    TileViewVScrollBar.Visible = true;
+                    break;
+
+                case 1:
+                    m_TileMode = ETileMode.Movement;
+
+                    SurfaceTile.Visible = true;
+                    SurfaceObjectSet.Visible = false;
+                    SurfaceLevel.ShouldDrawTileOverlay = true;
+
+                    SplitObjectView.Visible = false;
+                    TileViewHScrollBar.Visible = true;
+                    TileViewVScrollBar.Visible = true;
+                    break;
+
+                case 2:
+                    m_TileMode = ETileMode.Object;
+
+                    SurfaceTile.Visible = false;
+                    SurfaceObjectSet.Visible = true;
+                    SurfaceLevel.ShouldDrawTileOverlay = false;
+
+                    SplitObjectView.Visible = true;
+                    TileViewHScrollBar.Visible = false;
+                    TileViewVScrollBar.Visible = false;
+
+                    UpdateObjectSet();
+
+                    break;
+                default:
+                    break;
             }
 
             SurfaceTile.UpdateTileMode(m_TileMode);
@@ -405,9 +495,9 @@ namespace DirectX11TutorialLevelEditor
 
         private void 저장하기ToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            dlgSaveFile.Filter = "Level|*.xml";
+            dlgSaveFile.Filter = "Level file (.xml)|*.xml";
             dlgSaveFile.InitialDirectory = KAssetDir;
-            dlgSaveFile.Title = "저장하기";
+            dlgSaveFile.Title = "레벨 저장하기";
             dlgSaveFile.DefaultExt = "xml";
 
             DialogResult result = dlgSaveFile.ShowDialog();
@@ -415,6 +505,27 @@ namespace DirectX11TutorialLevelEditor
             if (result == DialogResult.OK)
             {
                 SerializeLevel(dlgSaveFile.FileName);
+            }
+        }
+
+        private void 불러오기ToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            dlgOpenFile.Filter = "Level file (.xml)|*.xml";
+            dlgOpenFile.InitialDirectory = KAssetDir;
+            dlgOpenFile.Title = "레벨 불러오기";
+            dlgOpenFile.DefaultExt = "xml";
+
+            DialogResult result = dlgOpenFile.ShowDialog();
+
+            if (result == DialogResult.OK)
+            {
+                DeserializeLevel(dlgOpenFile.FileName);
+
+                lbInsertedObjests.ClearSelected();
+                lbObjectSet.ClearSelected();
+
+                SurfaceLevel.SelectedInsertedObjectIndex = lbInsertedObjests.SelectedIndex;
+                SurfaceObjectSet.DrawingRectangle = new Rectangle(0, 0, 0, 0);
             }
         }
 
@@ -437,6 +548,7 @@ namespace DirectX11TutorialLevelEditor
                 level_info.SetAttribute("level_height", SurfaceLevel.GetLevelSize().Height.ToString());
                 level_info.SetAttribute("design_tileset", SurfaceLevel.GetTileModeInfoRef(ETileMode.Design).TileSheetFileName);
                 level_info.SetAttribute("movement_tileset", SurfaceLevel.GetTileModeInfoRef(ETileMode.Movement).TileSheetFileName);
+                level_info.SetAttribute("objectset", m_ObjectSet.ObjectSet.ObjectSetName);
 
                 root.AppendChild(level_info);
             }
@@ -485,25 +597,27 @@ namespace DirectX11TutorialLevelEditor
                 root.AppendChild(movement_tile_data);
             }
 
+            {
+                XmlElement objects = doc.CreateElement("objects");
+                objects.SetAttribute("object_count", SurfaceLevel.InsertedObjects.Count.ToString());
+
+                foreach (CInsertedObject inserted in SurfaceLevel.InsertedObjects)
+                {
+                    XmlElement @object = doc.CreateElement("object");
+                    @object.SetAttribute("id", inserted.ObjectID.ToString());
+                    @object.SetAttribute("x", inserted.Position.X.ToString());
+                    @object.SetAttribute("y", inserted.Position.Y.ToString());
+
+                    objects.AppendChild(@object);
+                }
+
+                root.AppendChild(objects);
+            }
+
             doc.AppendChild(root);
 
             doc.Save(file_name);
 
-        }
-
-        private void 불러오기ToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            dlgOpenFile.Filter = "Level file (.xml)|*.xml";
-            dlgOpenFile.InitialDirectory = KAssetDir;
-            dlgOpenFile.Title = "불러오기";
-            dlgOpenFile.DefaultExt = "xml";
-
-            DialogResult result = dlgOpenFile.ShowDialog();
-
-            if (result == DialogResult.OK)
-            {
-                DeserializeLevel(dlgOpenFile.FileName);
-            }
         }
 
         private void DeserializeLevel(string file_name)
@@ -541,6 +655,14 @@ namespace DirectX11TutorialLevelEditor
                 XmlAttribute movement_tileset = level_info.Attributes[6];
                 m_MovementTileInfo.TileSheetFileName = movement_tileset.Value;
 
+                lbObjectSet.Items.Clear();
+                if (level_info.Attributes.Count > 7)
+                {
+                    XmlAttribute object_set = level_info.Attributes[7];
+                    m_ObjectSet.LoadFromFile(KAssetDir + object_set.Value + ".xml");
+
+                    UpdateObjectSet();
+                }
 
                 SurfaceTile.SetTileSheetTextures(ref m_DesignTileInfo, ref m_MovementTileInfo);
 
@@ -586,6 +708,30 @@ namespace DirectX11TutorialLevelEditor
                     }
                 }
 
+
+                SurfaceLevel.InsertedObjects.Clear();
+                lbInsertedObjests.Items.Clear();
+                if (root.ChildNodes.Count > 3)
+                {
+                    XmlElement objects = (XmlElement)root.ChildNodes[3];
+                    int object_count = Convert.ToInt32(objects.GetAttribute("object_count"));
+                    for (int i = 0; i < object_count; ++i)
+                    {
+                        XmlElement @object = (XmlElement)objects.ChildNodes[i];
+
+                        CInsertedObject inserted = new CInsertedObject();
+                        inserted.ObjectID = Convert.ToInt32(@object.GetAttribute("id"));
+                        inserted.Position.X = Convert.ToInt32(@object.GetAttribute("x"));
+                        inserted.Position.Y = Convert.ToInt32(@object.GetAttribute("y"));
+
+                        SurfaceLevel.InsertedObjects.Add(inserted);
+
+                        ObjectSetElementData element = m_ObjectSet.ObjectSet.Elements[inserted.ObjectID];
+
+                        lbInsertedObjests.Items.Add("obj" + lbInsertedObjests.Items.Count.ToString() +
+                        "_" + element.ElementName);
+                    }
+                }
             }
 
             UpdateMainFrmTitle();
@@ -604,11 +750,11 @@ namespace DirectX11TutorialLevelEditor
             this.Text = KMainFormTitle + " : " + m_LevelName;
         }
 
-        private void 불러오기ToolStripMenuItem1_Click(object sender, EventArgs e)
+        private void 타일불러오기ToolStripMenuItem_Click(object sender, EventArgs e)
         {
             dlgOpenFile.Filter = "Tileset texture (.png)|*.png";
             dlgOpenFile.InitialDirectory = KAssetDir;
-            dlgOpenFile.Title = "불러오기";
+            dlgOpenFile.Title = "타일셋 불러오기";
             dlgOpenFile.DefaultExt = "png";
 
             DialogResult result = dlgOpenFile.ShowDialog();
@@ -629,7 +775,7 @@ namespace DirectX11TutorialLevelEditor
             }
         }
 
-        private void 크기설정ToolStripMenuItem_Click(object sender, EventArgs e)
+        private void 타일크기설정ToolStripMenuItem_Click(object sender, EventArgs e)
         {
             NewTilesetSize new_tileset_size = new NewTilesetSize();
 
@@ -645,6 +791,96 @@ namespace DirectX11TutorialLevelEditor
                 UpdateMainFrmTitle();
 
                 UpdateViews();
+            }
+
+            new_tileset_size.Dispose();
+        }
+
+        private void 오브젝트셋지정ToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            dlgOpenFile.Filter = "Objectset file (.xml)|*.xml";
+            dlgOpenFile.InitialDirectory = KAssetDir;
+            dlgOpenFile.Title = "오브젝트셋 불러오기";
+            dlgOpenFile.DefaultExt = "xml";
+
+            if (dlgOpenFile.ShowDialog() == DialogResult.OK)
+            {
+                m_ObjectSet.LoadFromFile(dlgOpenFile.FileName);
+
+                UpdateObjectSet();
+            }
+        }
+
+        private void UpdateObjectSet()
+        {
+            lbObjectSet.Items.Clear();
+
+            if (m_ObjectSet.ObjectSet != null)
+            {
+                foreach (ObjectSetElementData element in m_ObjectSet.ObjectSet.Elements)
+                {
+                    lbObjectSet.Items.Add(element.ElementName);
+                }
+
+                SurfaceObjectSet.ClearTextures();
+
+                SurfaceObjectSet.AddTexture(m_ObjectSet.ObjectSet.TextureFileName);
+
+                SurfaceObjectSet.Invalidate();
+
+                SurfaceLevel.SetObjectSet(m_ObjectSet.ObjectSet);
+            }
+        }
+
+        private void LbObjectSet_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (lbObjectSet.Items.Count > 0)
+            {
+                if (lbObjectSet.SelectedIndex == -1)
+                {
+                    SurfaceObjectSet.DrawingRectangle = new Rectangle(0, 0, 0, 0);
+                }
+                else
+                {
+                    ObjectSetElementData element = m_ObjectSet.ObjectSet.Elements[lbObjectSet.SelectedIndex];
+
+                    SurfaceObjectSet.DrawingRectangle = new Rectangle(
+                        element.OffsetU, element.OffsetV, element.Size.Width, element.Size.Height);
+                }
+               
+
+                SurfaceLevel.ObjectOverlayRectangle = SurfaceObjectSet.DrawingRectangle;
+
+                SurfaceObjectSet.Invalidate();
+
+                SurfaceLevel.Invalidate();
+            }
+        }
+
+        private void LbInsertedObjests_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (lbInsertedObjests.Items.Count > 0)
+            {
+                SurfaceLevel.SelectedInsertedObjectIndex = lbInsertedObjests.SelectedIndex;
+
+                SurfaceLevel.Invalidate();
+            }
+        }
+
+        private void LbInsertedObjests_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.KeyCode == Keys.Delete)
+            {
+                if (lbInsertedObjests.SelectedIndex != -1)
+                {
+                    SurfaceLevel.InsertedObjects.RemoveAt(lbInsertedObjests.SelectedIndex);
+
+                    lbInsertedObjests.Items.RemoveAt(lbInsertedObjests.SelectedIndex);
+
+                    SurfaceLevel.SelectedInsertedObjectIndex = lbInsertedObjests.SelectedIndex;
+
+                    SurfaceLevel.Invalidate();
+                }
             }
         }
     }

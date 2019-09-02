@@ -71,6 +71,9 @@
     </Compile>
     <Compile Include="MGSurface.cs" />
     <Compile Include="MGSurfaceLevel.cs" />
+    <Compile Include="MGSurfaceObjectSet.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="MGSurfaceTile.cs" />
     <Compile Include="NewLevel.cs">
       <SubType>Form</SubType>
@@ -84,6 +87,7 @@
     <Compile Include="NewTilesetSize.Designer.cs">
       <DependentUpon>NewTilesetSize.cs</DependentUpon>
     </Compile>
+    <Compile Include="ObjectSetManager.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <EmbeddedResource Include="MainFrm.resx">

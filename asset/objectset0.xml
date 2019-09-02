@@ -1,0 +1,18 @@
+<DirectX11TutorialObjectSet>
+  <ObjectSetInfo Name="objectset0" Texture="ObjectSet.png" />
+  <ObjectSet>
+    <Element Name="clouds" OffsetU="0" OffsetV="0" Width="384" Height="216" />
+    <Element Name="bush0" OffsetU="58" OffsetV="236" Width="109" Height="40" />
+    <Element Name="bush1" OffsetU="176" OffsetV="239" Width="72" Height="38" />
+    <Element Name="bush2" OffsetU="271" OffsetV="247" Width="52" Height="30" />
+    <Element Name="bush3" OffsetU="337" OffsetV="250" Width="49" Height="27" />
+    <Element Name="grass0" OffsetU="64" OffsetV="283" Width="29" Height="27" />
+    <Element Name="grass1" OffsetU="91" OffsetV="284" Width="35" Height="26" />
+    <Element Name="grass2" OffsetU="127" OffsetV="294" Width="35" Height="15" />
+    <Element Name="flower0" OffsetU="64" OffsetV="321" Width="32" Height="46" />
+    <Element Name="flower1" OffsetU="104" OffsetV="325" Width="52" Height="43" />
+    <Element Name="flower2" OffsetU="160" OffsetV="320" Width="43" Height="48" />
+    <Element Name="flower3" OffsetU="218" OffsetV="322" Width="31" Height="49" />
+    <Element Name="flower4" OffsetU="262" OffsetV="321" Width="40" Height="49" />
+  </ObjectSet>
+</DirectX11TutorialObjectSet>

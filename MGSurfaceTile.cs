@@ -15,13 +15,11 @@ namespace DirectX11TutorialLevelEditor
         private STileModeInfo m_DesignTileInfo;
         private STileModeInfo m_MovementTileInfo;
 
-        public MGSurfaceTile(string asset_dir) : base(asset_dir) { }
-
         protected override void Initialize()
         {
             base.Initialize();
 
-            m_BGColor = new Color(0.0f, 0.0f, 0.3f, 1.0f);
+            BackgroundColor = new Color(0.0f, 0.0f, 0.3f, 1.0f);
         }
 
         protected override void Draw()

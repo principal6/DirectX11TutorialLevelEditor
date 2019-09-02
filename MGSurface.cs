@@ -20,13 +20,19 @@ namespace DirectX11TutorialLevelEditor
     public class MGSurface : MonoGame.Forms.Controls.InvalidationControl
     {
         protected string m_AssetDir;
-        protected Color m_BGColor = Color.White;
         protected List<MGTextureData> m_Textures = new List<MGTextureData>();
+        public Color BackgroundColor = Color.White;
         public SSize FixedMovementTileSize;
 
-        public MGSurface(string asset_dir)
+        ~MGSurface()
         {
-            m_AssetDir = asset_dir;
+            m_Textures.Clear();
+            Dispose();
+        }
+
+        public void SetAssetDir(string AssetDir)
+        {
+            m_AssetDir = AssetDir;
         }
 
         public Texture2D CreateBlankTexture2D()
@@ -63,6 +69,11 @@ namespace DirectX11TutorialLevelEditor
             m_Textures.ElementAt(m_Textures.Count - 1).Rect = new Rectangle(0, 0, Texture.Width, Texture.Height);
         }
 
+        public void ClearTextures()
+        {
+            m_Textures.Clear();
+        }
+
         protected override void Initialize()
         {
             base.Initialize();
@@ -72,12 +83,12 @@ namespace DirectX11TutorialLevelEditor
         {
             base.Draw();
 
-            Editor.graphics.Clear(m_BGColor);
+            Editor.graphics.Clear(BackgroundColor);
         }
 
         protected void BeginDrawing()
         {
-            Editor.spriteBatch.Begin();
+            Editor.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.NonPremultiplied);
         }
 
         protected void DrawAllTextures()

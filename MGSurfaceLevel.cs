@@ -3,9 +3,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.IO;
 
 using System.Windows.Forms;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
+
+using ObjectSetData = DirectX11TutorialObjectEditor.ObjectSetData;
 
 namespace DirectX11TutorialLevelEditor
 {
@@ -23,14 +27,21 @@ namespace DirectX11TutorialLevelEditor
         public int[] IntData = new int[5];
     }
 
+    public class CInsertedObject
+    {
+        public int ObjectID;
+        public SPosition Position;
+    }
+
     public class MGSurfaceLevel : MGSurface
     {
         private int[,] m_LevelTilesDesign;
         private int[,] m_LevelTilesMovement;
-        private Color HoverColor;
+        private Color OverlayColor;
         private SSize m_LevelSizeInTileCount;
 
-        private SPosition m_MouseHoverPos;
+        private SPosition m_MouseHoverPosInTiles;
+        private SPosition m_MouseHoverPosPhysical;
         private SPosition m_LevelBasePos;
 
         private ETileMode m_TileMode;
@@ -44,15 +55,22 @@ namespace DirectX11TutorialLevelEditor
         private SSize m_ScaledTileSize;
         private float m_ScaleFactor = 1.0f;
 
-        public MGSurfaceLevel(string asset_dir) : base(asset_dir) { }
+        public bool ShouldDrawTileOverlay = true;
+        private Texture2D m_ObjectSetTexture;
+        private Texture2D m_ObjectBorderTexture;
+        public List<CInsertedObject> InsertedObjects = new List<CInsertedObject>();
+        private ObjectSetData m_ObjectSetData;
+        public int SelectedInsertedObjectIndex = -1;
+
+        public Rectangle ObjectOverlayRectangle { set; get; } = new Rectangle(0, 0, 0, 0);
 
         protected override void Initialize()
         {
             base.Initialize();
 
-            m_BGColor = new Color(0.3f, 0.3f, 0.3f, 1.0f);
+            BackgroundColor = new Color(0.3f, 0.3f, 0.3f, 1.0f);
 
-            HoverColor = new Color(0.7f, 0.7f, 0.7f, 0.5f);
+            OverlayColor = new Color(0.7f, 0.7f, 0.7f, 0.5f);
         }
 
         protected override void Draw()
@@ -74,6 +92,35 @@ namespace DirectX11TutorialLevelEditor
                 Editor.spriteBatch.Draw(m_Textures[0].Texture,
                     m_Textures[0].Rect, new Rectangle(0, 0, 1, 1),
                     m_Textures[0].BlendColor);
+
+                // 등록된 오브젝트들 그리기
+                if (m_ObjectSetTexture != null)
+                {
+                    Rectangle rect_src;
+                    Rectangle rect_dest;
+
+                    foreach (CInsertedObject inserted in InsertedObjects)
+                    {
+                        rect_src = new Rectangle(
+                            m_ObjectSetData.Elements[inserted.ObjectID].OffsetU,
+                            m_ObjectSetData.Elements[inserted.ObjectID].OffsetV,
+                            m_ObjectSetData.Elements[inserted.ObjectID].Size.Width,
+                            m_ObjectSetData.Elements[inserted.ObjectID].Size.Height);
+
+                        SPosition pos = new SPosition(
+                            (int)(inserted.Position.X * m_ScaleFactor),
+                            (int)(inserted.Position.Y * m_ScaleFactor)
+                            );
+
+                        rect_dest = new Rectangle(
+                        pos.X - (int)(m_LevelBasePos.X * m_DesignTileInfo.TileSize.Width * m_ScaleFactor),
+                        pos.Y - (int)(m_LevelBasePos.Y * m_DesignTileInfo.TileSize.Height * m_ScaleFactor),
+                        (int)(m_ObjectSetData.Elements[inserted.ObjectID].Size.Width * m_ScaleFactor),
+                        (int)(m_ObjectSetData.Elements[inserted.ObjectID].Size.Height * m_ScaleFactor));
+
+                        Editor.spriteBatch.Draw(m_ObjectSetTexture, rect_dest, rect_src, Color.White);
+                    }
+                }
 
                 float blend_factor = 1.0f;
                 if (m_TileMode == ETileMode.Movement)
@@ -125,7 +172,6 @@ namespace DirectX11TutorialLevelEditor
                                 continue;
                             }
 
-
                             SPosition tile_xy = GetTileXYFromTileID(ref m_MovementTileInfo, m_LevelTilesMovement[x, y]);
 
                             Rectangle rect_dest = new Rectangle(
@@ -145,13 +191,13 @@ namespace DirectX11TutorialLevelEditor
 
             }
 
-
+            if (ShouldDrawTileOverlay == true)
             {
                 SPosition tile_xy = curr_mode.SelectionOrigin;
 
                 Rectangle rect_dest = new Rectangle(
-                        m_MouseHoverPos.X * m_ScaledTileSize.Width,
-                        m_MouseHoverPos.Y * m_ScaledTileSize.Height,
+                        m_MouseHoverPosInTiles.X * m_ScaledTileSize.Width,
+                        m_MouseHoverPosInTiles.Y * m_ScaledTileSize.Height,
                         curr_mode.SelectionSizeInTileCount.Width * m_ScaledTileSize.Width,
                         curr_mode.SelectionSizeInTileCount.Height * m_ScaledTileSize.Height);
 
@@ -170,10 +216,83 @@ namespace DirectX11TutorialLevelEditor
                 }
 
                 Editor.spriteBatch.Draw(m_Textures[texture_index].Texture,
-                rect_dest, rect_src, HoverColor);
+                rect_dest, rect_src, OverlayColor);
+            }
+            else
+            {
+                if (m_ObjectSetTexture != null)
+                {
+                    Rectangle rect_dest;
+                    Rectangle rect_src;
+
+                    // 선택된 등록 오브젝트 테두리 그리기
+                    if (SelectedInsertedObjectIndex != -1)
+                    {
+                        CInsertedObject inserted = InsertedObjects[SelectedInsertedObjectIndex];
+                        Color color = new Color(1.0f, 0.0f, 0.0f);
+
+                        rect_src = new Rectangle(0, 0, 1, 1);
+
+                        SPosition pos = inserted.Position;
+                        pos.X = (int)(pos.X * m_ScaleFactor);
+                        pos.Y = (int)(pos.Y * m_ScaleFactor);
+                        pos.X -= (int)(m_LevelBasePos.X * m_DesignTileInfo.TileSize.Width * m_ScaleFactor);
+                        pos.Y -= (int)(m_LevelBasePos.Y * m_DesignTileInfo.TileSize.Height * m_ScaleFactor);
+
+                        System.Drawing.Size size = m_ObjectSetData.Elements[inserted.ObjectID].Size;
+                        size.Width = (int)(size.Width * m_ScaleFactor);
+                        size.Height = (int)(size.Height * m_ScaleFactor);
+
+                        rect_dest = new Rectangle(
+                        pos.X,
+                        pos.Y,
+                        size.Width,
+                        1);
+                        Editor.spriteBatch.Draw(m_ObjectBorderTexture, rect_dest, rect_src, color);
+
+                        rect_dest = new Rectangle(
+                        pos.X,
+                        pos.Y + size.Height,
+                        size.Width,
+                        1);
+                        Editor.spriteBatch.Draw(m_ObjectBorderTexture, rect_dest, rect_src, color);
+
+                        rect_dest = new Rectangle(
+                        pos.X,
+                        pos.Y,
+                        1,
+                        size.Height);
+                        Editor.spriteBatch.Draw(m_ObjectBorderTexture, rect_dest, rect_src, color);
+
+                        rect_dest = new Rectangle(
+                        pos.X + size.Width,
+                        pos.Y,
+                        1,
+                        size.Height);
+                        Editor.spriteBatch.Draw(m_ObjectBorderTexture, rect_dest, rect_src, color);
+                    }
+
+                    
+                    // 선택된 오브젝트 오버레이
+                    rect_dest = new Rectangle(
+                        m_MouseHoverPosPhysical.X - (int)(ObjectOverlayRectangle.Width / 2 * m_ScaleFactor),
+                        m_MouseHoverPosPhysical.Y - (int)(ObjectOverlayRectangle.Height / 2 * m_ScaleFactor),
+                        (int)(ObjectOverlayRectangle.Width * m_ScaleFactor),
+                        (int)(ObjectOverlayRectangle.Height * m_ScaleFactor));
+
+                    Editor.spriteBatch.Draw(m_ObjectSetTexture, rect_dest, ObjectOverlayRectangle, OverlayColor);
+                }
             }
 
             EndDrawing();
+        }
+
+        public void SetObjectSet(ObjectSetData ObjectSet)
+        {
+            m_ObjectSetData = ObjectSet;
+
+            m_ObjectSetTexture = 
+                Texture2D.FromStream(Editor.graphics, File.OpenRead(m_AssetDir + m_ObjectSetData.TextureFileName));
         }
 
         public void UpdateTileMode(ETileMode mode)
@@ -200,8 +319,10 @@ namespace DirectX11TutorialLevelEditor
 
         public void UpdateMouseHoverPos(SPosition pos)
         {
-            m_MouseHoverPos.X = pos.X / m_ScaledTileSize.Width;
-            m_MouseHoverPos.Y = pos.Y / m_ScaledTileSize.Height;
+            m_MouseHoverPosPhysical = pos;
+
+            m_MouseHoverPosInTiles.X = pos.X / m_ScaledTileSize.Width;
+            m_MouseHoverPosInTiles.Y = pos.Y / m_ScaledTileSize.Height;
 
             Invalidate();
         }
@@ -228,8 +349,26 @@ namespace DirectX11TutorialLevelEditor
             Invalidate();
         }
 
+        public SPosition GetLevelBasePos()
+        {
+            return m_LevelBasePos;
+        }
+
+        public SPosition GetDesignTileScaledLevelBasePos()
+        {
+            return new SPosition(m_LevelBasePos.X * m_DesignTileInfo.TileSize.Width,
+                m_LevelBasePos.Y * m_DesignTileInfo.TileSize.Height);
+        }
+
+        public SPosition GetScaledLevelBasePos()
+        {
+            return new SPosition(m_LevelBasePos.X * m_ScaledTileSize.Width, m_LevelBasePos.Y * m_ScaledTileSize.Height);
+        }
+
         public void SetLevelTile(int mouse_x, int mouse_y, bool should_erase = false)
         {
+            if (m_TileMode == ETileMode.Object) return;
+
             bool is_set_new_tile = false;
 
             ref STileModeInfo tile_mode = ref GetCurrentTileModeInfoRef();
@@ -449,6 +588,9 @@ namespace DirectX11TutorialLevelEditor
 
             // 움직임 타일 텍스처
             AddTexture(m_MovementTileInfo.TileSheetFileName);
+
+            // 오브젝트 테두리 텍스처
+            m_ObjectBorderTexture = CreateBlankTexture2D();
 
             Invalidate();
         }
