@@ -51,8 +51,7 @@ namespace DirectX11TutorialLevelEditor
         private Stack<CHistory> m_HistoryStack = new Stack<CHistory>();
         private Stack<CHistory> m_UnHistoryStack = new Stack<CHistory>();
         private int m_HistoryStackLastGroup = 0;
-
-        private SSize m_ScaledTileSize;
+        
         private float m_ScaleFactor = 1.0f;
 
         public bool ShouldDrawTileOverlay = true;
@@ -84,10 +83,15 @@ namespace DirectX11TutorialLevelEditor
 
             if (m_LevelTilesDesign != null)
             {
-                m_Textures[0].Rect.X = -m_LevelBasePos.X * m_ScaledTileSize.Width;
-                m_Textures[0].Rect.Y = -m_LevelBasePos.Y * m_ScaledTileSize.Height;
-                m_Textures[0].Rect.Width = m_LevelSizeInTileCount.Width * m_ScaledTileSize.Width;
-                m_Textures[0].Rect.Height = m_LevelSizeInTileCount.Height * m_ScaledTileSize.Height;
+                // 배경 그리기
+                m_Textures[0].Rect.X = 
+                    (int)(-m_LevelBasePos.X * m_DesignTileInfo.TileSize.Width * m_ScaleFactor);
+                m_Textures[0].Rect.Y = 
+                    (int)(-m_LevelBasePos.Y * m_DesignTileInfo.TileSize.Width * m_ScaleFactor);
+                m_Textures[0].Rect.Width = 
+                    (int)(m_LevelSizeInTileCount.Width * m_DesignTileInfo.TileSize.Width * m_ScaleFactor);
+                m_Textures[0].Rect.Height =
+                    (int)(m_LevelSizeInTileCount.Height * m_DesignTileInfo.TileSize.Width * m_ScaleFactor);
 
                 Editor.spriteBatch.Draw(m_Textures[0].Texture,
                     m_Textures[0].Rect, new Rectangle(0, 0, 1, 1),
@@ -122,6 +126,7 @@ namespace DirectX11TutorialLevelEditor
                     }
                 }
 
+                // 디자인 타일 그리기
                 float blend_factor = 1.0f;
                 if (m_TileMode == ETileMode.Movement)
                 {
@@ -146,8 +151,10 @@ namespace DirectX11TutorialLevelEditor
                         SPosition tile_xy = GetTileXYFromTileID(ref m_DesignTileInfo, m_LevelTilesDesign[x, y]);
 
                         Rectangle rect_dest = new Rectangle(
-                                offset_x * m_ScaledTileSize.Width, offset_y * m_ScaledTileSize.Height,
-                                m_ScaledTileSize.Width, m_ScaledTileSize.Height);
+                                (int)(offset_x * m_DesignTileInfo.TileSize.Width * m_ScaleFactor),
+                                (int)(offset_y * m_DesignTileInfo.TileSize.Height * m_ScaleFactor),
+                                (int)(m_DesignTileInfo.TileSize.Width * (m_ScaleFactor + 0.02f)), 
+                                (int)(m_DesignTileInfo.TileSize.Width * (m_ScaleFactor + 0.02f)));
 
                         Rectangle rect_src = new Rectangle(
                                 tile_xy.X * m_DesignTileInfo.TileSize.Width, tile_xy.Y * m_DesignTileInfo.TileSize.Height,
@@ -158,6 +165,7 @@ namespace DirectX11TutorialLevelEditor
                     }
                 }
 
+                // 움직임 타일 그리기
                 if (m_TileMode == ETileMode.Movement)
                 {
                     for (int x = 0; x < m_LevelSizeInTileCount.Width; ++x)
@@ -175,8 +183,10 @@ namespace DirectX11TutorialLevelEditor
                             SPosition tile_xy = GetTileXYFromTileID(ref m_MovementTileInfo, m_LevelTilesMovement[x, y]);
 
                             Rectangle rect_dest = new Rectangle(
-                                    offset_x * m_ScaledTileSize.Width, offset_y * m_ScaledTileSize.Height,
-                                    m_ScaledTileSize.Width, m_ScaledTileSize.Height);
+                                (int)(offset_x * m_DesignTileInfo.TileSize.Width * m_ScaleFactor),
+                                (int)(offset_y * m_DesignTileInfo.TileSize.Height * m_ScaleFactor),
+                                (int)(m_DesignTileInfo.TileSize.Width * (m_ScaleFactor + 0.02f)),
+                                (int)(m_DesignTileInfo.TileSize.Width * (m_ScaleFactor + 0.02f)));
 
                             Rectangle rect_src = new Rectangle(
                                     tile_xy.X * FixedMovementTileSize.Width, tile_xy.Y * FixedMovementTileSize.Height,
@@ -186,20 +196,19 @@ namespace DirectX11TutorialLevelEditor
                                 rect_dest, rect_src, m_Textures[2].BlendColor * 0.6f);
                         }
                     }
-
                 }
-
             }
 
+            // 선택된 타일 오버레이 그리기
             if (ShouldDrawTileOverlay == true)
             {
                 SPosition tile_xy = curr_mode.SelectionOrigin;
 
                 Rectangle rect_dest = new Rectangle(
-                        m_MouseHoverPosInTiles.X * m_ScaledTileSize.Width,
-                        m_MouseHoverPosInTiles.Y * m_ScaledTileSize.Height,
-                        curr_mode.SelectionSizeInTileCount.Width * m_ScaledTileSize.Width,
-                        curr_mode.SelectionSizeInTileCount.Height * m_ScaledTileSize.Height);
+                        (int)(m_MouseHoverPosInTiles.X * m_DesignTileInfo.TileSize.Width * m_ScaleFactor),
+                        (int)(m_MouseHoverPosInTiles.Y * m_DesignTileInfo.TileSize.Height * m_ScaleFactor),
+                        (int)(curr_mode.SelectionSizeInTileCount.Width * m_DesignTileInfo.TileSize.Width * m_ScaleFactor),
+                        (int)(curr_mode.SelectionSizeInTileCount.Height * m_DesignTileInfo.TileSize.Height * m_ScaleFactor));
 
                 Rectangle rect_src = new Rectangle(
                         tile_xy.X * curr_mode.TileSize.Width,
@@ -321,8 +330,8 @@ namespace DirectX11TutorialLevelEditor
         {
             m_MouseHoverPosPhysical = pos;
 
-            m_MouseHoverPosInTiles.X = pos.X / m_ScaledTileSize.Width;
-            m_MouseHoverPosInTiles.Y = pos.Y / m_ScaledTileSize.Height;
+            m_MouseHoverPosInTiles.X = (int)(pos.X / (m_DesignTileInfo.TileSize.Width * m_ScaleFactor));
+            m_MouseHoverPosInTiles.Y = (int)(pos.Y / (m_DesignTileInfo.TileSize.Height * m_ScaleFactor));
 
             Invalidate();
         }
@@ -360,11 +369,6 @@ namespace DirectX11TutorialLevelEditor
                 m_LevelBasePos.Y * m_DesignTileInfo.TileSize.Height);
         }
 
-        public SPosition GetScaledLevelBasePos()
-        {
-            return new SPosition(m_LevelBasePos.X * m_ScaledTileSize.Width, m_LevelBasePos.Y * m_ScaledTileSize.Height);
-        }
-
         public void SetLevelTile(int mouse_x, int mouse_y, bool should_erase = false)
         {
             if (m_TileMode == ETileMode.Object) return;
@@ -374,8 +378,8 @@ namespace DirectX11TutorialLevelEditor
             ref STileModeInfo tile_mode = ref GetCurrentTileModeInfoRef();
             ref int[,] tiles = ref GetCurrentModeTilesRef();
 
-            int x_in_tiles = mouse_x / m_ScaledTileSize.Width;
-            int y_in_tiles = mouse_y / m_ScaledTileSize.Height;
+            int x_in_tiles = (int)(mouse_x / (m_DesignTileInfo.TileSize.Width * m_ScaleFactor));
+            int y_in_tiles = (int)(mouse_y / (m_DesignTileInfo.TileSize.Height * m_ScaleFactor));
 
             int offset_x = m_LevelBasePos.X + x_in_tiles;
             int offset_y = m_LevelBasePos.Y + y_in_tiles;
@@ -551,8 +555,6 @@ namespace DirectX11TutorialLevelEditor
 
         public void CreateLevel(int size_x, int size_y, STileModeInfo design_tile, STileModeInfo movement_tile)
         {
-            m_ScaledTileSize = design_tile.TileSize;
-
             System.Diagnostics.Debug.Assert(design_tile.TileSize == movement_tile.TileSize);
 
             m_HistoryStack.Clear();
@@ -714,9 +716,6 @@ namespace DirectX11TutorialLevelEditor
         public void SetScaleFactor(float Factor)
         {
             m_ScaleFactor = Factor;
-
-            m_ScaledTileSize.Width = (int)(m_DesignTileInfo.TileSize.Width * m_ScaleFactor);
-            m_ScaledTileSize.Height = (int)(m_DesignTileInfo.TileSize.Height * m_ScaleFactor);
         }
 
         public float GetScaleFactor()

@@ -343,11 +343,21 @@ namespace DirectX11TutorialLevelEditor
             {
                 SSize level_size = SurfaceLevel.GetLevelSize();
 
-                int level_x = (level_size.Width * KDefaultTileSize.Width - LevelViewHScrollBar.Width) / KDefaultTileSize.Width;
-                LevelViewHScrollBar.Maximum = Math.Max(LevelViewHScrollBar.LargeChange + level_x, LevelViewHScrollBar.LargeChange - 1);
+                int level_x = 
+                    ((int)(level_size.Width * SurfaceLevel.GetTileSize().Width * SurfaceLevel.GetScaleFactor())
+                    - LevelViewHScrollBar.Width) /
+                    (int)(SurfaceLevel.GetTileSize().Width * SurfaceLevel.GetScaleFactor());
 
-                int level_y = (level_size.Height * KDefaultTileSize.Height - LevelViewVScrollBar.Height) / KDefaultTileSize.Height + 1;
-                LevelViewVScrollBar.Maximum = Math.Max(LevelViewVScrollBar.LargeChange + level_y, LevelViewVScrollBar.LargeChange - 1);
+                LevelViewHScrollBar.Maximum =
+                    Math.Max(LevelViewHScrollBar.LargeChange + level_x, LevelViewHScrollBar.LargeChange - 1);
+
+                int level_y = 
+                    ((int)(level_size.Height * SurfaceLevel.GetTileSize().Height * SurfaceLevel.GetScaleFactor())
+                    - LevelViewVScrollBar.Height) /
+                    (int)(SurfaceLevel.GetTileSize().Height * SurfaceLevel.GetScaleFactor()) + 1;
+
+                LevelViewVScrollBar.Maximum = 
+                    Math.Max(LevelViewVScrollBar.LargeChange + level_y, LevelViewVScrollBar.LargeChange - 1);
 
                 SurfaceLevel.Invalidate();
 

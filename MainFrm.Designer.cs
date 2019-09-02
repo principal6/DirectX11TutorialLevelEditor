@@ -48,7 +48,6 @@
             this.오브젝트셋지정ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.SplitViews = new System.Windows.Forms.SplitContainer();
             this.SplitObjectView = new System.Windows.Forms.SplitContainer();
-            this.lbInsertedObjests = new System.Windows.Forms.ListBox();
             this.SplitObjectSet = new System.Windows.Forms.SplitContainer();
             this.lbObjectSet = new System.Windows.Forms.ListBox();
             this.TileViewHScrollBar = new System.Windows.Forms.HScrollBar();
@@ -57,6 +56,9 @@
             this.LevelViewVScrollBar = new System.Windows.Forms.VScrollBar();
             this.dlgSaveFile = new System.Windows.Forms.SaveFileDialog();
             this.dlgOpenFile = new System.Windows.Forms.OpenFileDialog();
+            this.SplitInsertedObjects = new System.Windows.Forms.SplitContainer();
+            this.lbInsertedObjests = new System.Windows.Forms.ListBox();
+            this.label1 = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.SplitTab)).BeginInit();
             this.SplitTab.Panel1.SuspendLayout();
             this.SplitTab.Panel2.SuspendLayout();
@@ -74,6 +76,10 @@
             ((System.ComponentModel.ISupportInitialize)(this.SplitObjectSet)).BeginInit();
             this.SplitObjectSet.Panel2.SuspendLayout();
             this.SplitObjectSet.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.SplitInsertedObjects)).BeginInit();
+            this.SplitInsertedObjects.Panel1.SuspendLayout();
+            this.SplitInsertedObjects.Panel2.SuspendLayout();
+            this.SplitInsertedObjects.SuspendLayout();
             this.SuspendLayout();
             // 
             // SplitTab
@@ -282,7 +288,7 @@
             // 
             // SplitObjectView.Panel1
             // 
-            this.SplitObjectView.Panel1.Controls.Add(this.lbInsertedObjests);
+            this.SplitObjectView.Panel1.Controls.Add(this.SplitInsertedObjects);
             // 
             // SplitObjectView.Panel2
             // 
@@ -290,18 +296,6 @@
             this.SplitObjectView.Size = new System.Drawing.Size(249, 342);
             this.SplitObjectView.SplitterDistance = 121;
             this.SplitObjectView.TabIndex = 5;
-            // 
-            // lbInsertedObjests
-            // 
-            this.lbInsertedObjests.Dock = System.Windows.Forms.DockStyle.Left;
-            this.lbInsertedObjests.FormattingEnabled = true;
-            this.lbInsertedObjests.ItemHeight = 12;
-            this.lbInsertedObjests.Location = new System.Drawing.Point(0, 0);
-            this.lbInsertedObjests.Name = "lbInsertedObjests";
-            this.lbInsertedObjests.Size = new System.Drawing.Size(172, 121);
-            this.lbInsertedObjests.TabIndex = 1;
-            this.lbInsertedObjests.SelectedIndexChanged += new System.EventHandler(this.LbInsertedObjests_SelectedIndexChanged);
-            this.lbInsertedObjests.KeyDown += new System.Windows.Forms.KeyEventHandler(this.LbInsertedObjests_KeyDown);
             // 
             // SplitObjectSet
             // 
@@ -372,6 +366,46 @@
             // 
             this.dlgOpenFile.FileName = "openFileDialog1";
             // 
+            // SplitInsertedObjects
+            // 
+            this.SplitInsertedObjects.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.SplitInsertedObjects.IsSplitterFixed = true;
+            this.SplitInsertedObjects.Location = new System.Drawing.Point(0, 0);
+            this.SplitInsertedObjects.Name = "SplitInsertedObjects";
+            this.SplitInsertedObjects.Orientation = System.Windows.Forms.Orientation.Horizontal;
+            // 
+            // SplitInsertedObjects.Panel1
+            // 
+            this.SplitInsertedObjects.Panel1.Controls.Add(this.label1);
+            // 
+            // SplitInsertedObjects.Panel2
+            // 
+            this.SplitInsertedObjects.Panel2.Controls.Add(this.lbInsertedObjests);
+            this.SplitInsertedObjects.Size = new System.Drawing.Size(249, 121);
+            this.SplitInsertedObjects.SplitterDistance = 25;
+            this.SplitInsertedObjects.TabIndex = 4;
+            // 
+            // lbInsertedObjests
+            // 
+            this.lbInsertedObjests.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.lbInsertedObjests.FormattingEnabled = true;
+            this.lbInsertedObjests.ItemHeight = 12;
+            this.lbInsertedObjests.Location = new System.Drawing.Point(0, 0);
+            this.lbInsertedObjests.Name = "lbInsertedObjests";
+            this.lbInsertedObjests.Size = new System.Drawing.Size(249, 92);
+            this.lbInsertedObjests.TabIndex = 2;
+            this.lbInsertedObjests.SelectedIndexChanged += new System.EventHandler(this.LbInsertedObjests_SelectedIndexChanged);
+            this.lbInsertedObjests.KeyDown += new System.Windows.Forms.KeyEventHandler(this.LbInsertedObjests_KeyDown);
+            // 
+            // label1
+            // 
+            this.label1.AutoSize = true;
+            this.label1.Location = new System.Drawing.Point(3, 4);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(121, 12);
+            this.label1.TabIndex = 4;
+            this.label1.Text = "등록된 오브젝트 목록";
+            // 
             // MainFrm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 12F);
@@ -405,6 +439,11 @@
             this.SplitObjectSet.Panel2.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.SplitObjectSet)).EndInit();
             this.SplitObjectSet.ResumeLayout(false);
+            this.SplitInsertedObjects.Panel1.ResumeLayout(false);
+            this.SplitInsertedObjects.Panel1.PerformLayout();
+            this.SplitInsertedObjects.Panel2.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.SplitInsertedObjects)).EndInit();
+            this.SplitInsertedObjects.ResumeLayout(false);
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -438,9 +477,11 @@
         private System.Windows.Forms.ToolStripMenuItem 오브젝트셋지정ToolStripMenuItem;
         private System.Windows.Forms.TabPage TabObjectSet;
         private System.Windows.Forms.SplitContainer SplitObjectView;
-        private System.Windows.Forms.ListBox lbInsertedObjests;
         private System.Windows.Forms.SplitContainer SplitObjectSet;
         private System.Windows.Forms.ListBox lbObjectSet;
+        private System.Windows.Forms.SplitContainer SplitInsertedObjects;
+        private System.Windows.Forms.Label label1;
+        private System.Windows.Forms.ListBox lbInsertedObjests;
     }
 }
 
