@@ -620,8 +620,13 @@ namespace DirectX11TutorialLevelEditor
                 {
                     XmlElement @object = doc.CreateElement("object");
                     @object.SetAttribute("id", inserted.ObjectID.ToString());
-                    @object.SetAttribute("x", inserted.Position.X.ToString());
-                    @object.SetAttribute("y", inserted.Position.Y.ToString());
+
+                    int level_height = SurfaceLevel.GetLevelSize().Height * SurfaceLevel.GetTileSize().Height;
+
+                    @object.SetAttribute("x", 
+                        (inserted.Position.X + m_ObjectSet.ObjectSet.Elements[inserted.ObjectID].Size.Width / 2).ToString());
+                    @object.SetAttribute("y", 
+                        (level_height - inserted.Position.Y - m_ObjectSet.ObjectSet.Elements[inserted.ObjectID].Size.Height / 2).ToString());
 
                     objects.AppendChild(@object);
                 }
@@ -736,8 +741,13 @@ namespace DirectX11TutorialLevelEditor
 
                         CInsertedObject inserted = new CInsertedObject();
                         inserted.ObjectID = Convert.ToInt32(@object.GetAttribute("id"));
-                        inserted.Position.X = Convert.ToInt32(@object.GetAttribute("x"));
-                        inserted.Position.Y = Convert.ToInt32(@object.GetAttribute("y"));
+
+                        int level_height = SurfaceLevel.GetLevelSize().Height * SurfaceLevel.GetTileSize().Height;
+
+                        inserted.Position.X = 
+                            Convert.ToInt32(@object.GetAttribute("x")) - m_ObjectSet.ObjectSet.Elements[inserted.ObjectID].Size.Width / 2;
+                        inserted.Position.Y =
+                            level_height - Convert.ToInt32(@object.GetAttribute("y")) - m_ObjectSet.ObjectSet.Elements[inserted.ObjectID].Size.Height / 2;
 
                         SurfaceLevel.InsertedObjects.Add(inserted);
 
