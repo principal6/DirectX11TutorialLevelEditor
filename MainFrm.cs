@@ -558,7 +558,11 @@ namespace DirectX11TutorialLevelEditor
                 level_info.SetAttribute("level_height", SurfaceLevel.GetLevelSize().Height.ToString());
                 level_info.SetAttribute("design_tileset", SurfaceLevel.GetTileModeInfoRef(ETileMode.Design).TileSheetFileName);
                 level_info.SetAttribute("movement_tileset", SurfaceLevel.GetTileModeInfoRef(ETileMode.Movement).TileSheetFileName);
-                level_info.SetAttribute("objectset", m_ObjectSet.ObjectSet.ObjectSetName);
+
+                if (m_ObjectSet.ObjectSet != null)
+                {
+                    level_info.SetAttribute("objectset", m_ObjectSet.ObjectSet.ObjectSetName);
+                }
 
                 root.AppendChild(level_info);
             }
@@ -607,6 +611,7 @@ namespace DirectX11TutorialLevelEditor
                 root.AppendChild(movement_tile_data);
             }
 
+            if (m_ObjectSet.ObjectSet != null)
             {
                 XmlElement objects = doc.CreateElement("objects");
                 objects.SetAttribute("object_count", SurfaceLevel.InsertedObjects.Count.ToString());
